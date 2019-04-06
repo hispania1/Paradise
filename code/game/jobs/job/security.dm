@@ -278,6 +278,7 @@
 	head = /obj/item/clothing/head/beret/sec
 	shoes = /obj/item/clothing/shoes/jackboots
 	l_ear = /obj/item/radio/headset/headset_sec/alt
+	backpack_contents = list(/obj/item/restraints/handcuffs/cable/white = 2)
 	backpack = /obj/item/storage/backpack/security
 	satchel = /obj/item/storage/backpack/satchel_sec
 	dufflebag = /obj/item/storage/backpack/duffel/security
