@@ -234,7 +234,7 @@
 	selection_color = "#ffeeee"
 	access = list(access_security, access_sec_doors, access_brig, access_court, access_maint_tunnels, access_morgue, access_weapons, access_pilot, access_external_airlocks)
 	minimal_access = list(access_security, access_sec_doors, access_brig, access_court, access_maint_tunnels, access_weapons, access_pilot, access_external_airlocks)
-	minimal_player_age = 7
+	minimal_player_age = 14
 	outfit = /datum/outfit/job/pilot
 
 /datum/outfit/job/pilot
