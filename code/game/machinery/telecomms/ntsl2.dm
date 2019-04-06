@@ -82,6 +82,7 @@ GLOBAL_DATUM_INIT(nttc_config, /datum/nttc_configuration, new())
 		"Security Officer" = "#A30000",
 		"Security Pod Pilot" = "#A30000",
 		"Warden" = "#A30000",
+		"Security Cadet" = "#A30000",
 		// Supply
 		"Quartermaster" = "#7F6539",
 		"Cargo Technician" = "#7F6539",

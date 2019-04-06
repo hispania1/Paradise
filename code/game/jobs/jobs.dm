@@ -13,6 +13,8 @@ var/const/AI				=(1<<8)
 var/const/CYBORG			=(1<<9)
 var/const/CENTCOM			=(1<<10)
 var/const/SYNDICATE			=(1<<11)
+var/const/INTERN_SEC		=(1<<12)
+
 
 var/const/MEDSCI			=(1<<1)
 
@@ -138,7 +140,8 @@ var/list/security_positions = list(
 	"Brig Physician",
 	"Security Pod Pilot",
 	"Magistrate",
-	"Forensic Specialist"
+	"Forensic Specialist",
+	"Security Cadet"
 )
 
 

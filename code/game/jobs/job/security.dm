@@ -257,3 +257,29 @@
 	satchel = /obj/item/storage/backpack/satchel_sec
 	dufflebag = /obj/item/storage/backpack/duffel/security
 	box = /obj/item/storage/box/engineer
+
+/datum/job/intern_sec
+	title = "Security Cadet"
+	flag = INTERN_SEC
+	department_flag = ENGSEC
+	faction = "Station"
+	total_positions = 2
+	spawn_positions = 2
+	supervisors = "the Head of Security"
+	selection_color = "#ffeeee"
+	access = list(access_sec_doors, access_maint_tunnels)
+	minimal_access = list(access_sec_doors, access_maint_tunnels)
+	outfit = /datum/outfit/job/intern_sec
+
+/datum/outfit/job/intern_sec
+	name = "Security Cadet"
+	jobtype = /datum/job/intern_sec
+	uniform = /obj/item/clothing/under/rank/security2
+	head = /obj/item/clothing/head/beret/sec
+	shoes = /obj/item/clothing/shoes/jackboots
+	l_ear = /obj/item/radio/headset/headset_sec/alt
+	backpack = /obj/item/storage/backpack/security
+	satchel = /obj/item/storage/backpack/satchel_sec
+	dufflebag = /obj/item/storage/backpack/duffel/security
+	l_pocket = /obj/item/flash
+	r_pocket = /obj/item/reagent_containers/spray/pepper
