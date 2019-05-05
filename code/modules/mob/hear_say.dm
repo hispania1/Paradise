@@ -113,6 +113,10 @@
 	if(!client)
 		return
 
+	if((last_radio_sound + 0.5 SECONDS) >world.time)
+		playsound(loc, 'sound/effects/radio_chatter.ogg', 10, 0, -1, falloff = -3)
+		last_radio_sound = world.time
+
 	if(sleeping || stat == UNCONSCIOUS) //If unconscious or sleeping
 		hear_sleep(multilingual_to_message(message_pieces))
 		return
