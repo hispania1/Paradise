@@ -128,7 +128,8 @@ REAGENT SCANNER
 
 
 /obj/item/healthanalyzer/attack(mob/living/M, mob/living/user)
-	if(((CLUMSY in user.mutations) || user.getBrainLoss() >= 60) && prob(50))
+	var/role = user.mind.assigned_role
+	if((((CLUMSY in user.mutations) || user.getBrainLoss() >= 60) && prob(50)) || !(role in list("Chief Medical Officer", "Medical Doctor", "Coroner", "Paramedic", "Brig Physician")))
 		to_chat(user, text("<span class='warning'>You try to analyze the floor's vitals!</span>"))
 		for(var/mob/O in viewers(M, null))
 			O.show_message(text("<span class='warning'>[user] has analyzed the floor's vitals!</span>"), 1)
