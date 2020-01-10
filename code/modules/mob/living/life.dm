@@ -60,6 +60,8 @@
 
 	if(client)
 		handle_regular_hud_updates()
+	if(get_nations_mode())
+		process_nations()
 
 	..()
 
@@ -220,4 +222,11 @@
 	return
 
 /mob/living/proc/handle_hud_icons_health()
+	return
+
+/mob/living/proc/process_nations()
+	if(client)
+		var/client/C = client
+		for(var/mob/living/carbon/human/H in view(src, world.view))
+			C.images += H.hud_list[NATIONS_HUD]
 	return

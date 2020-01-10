@@ -31,15 +31,19 @@
 			if(!current)//no AI selected
 				to_chat(user, "<span class='danger'>No AI selected. Please chose a target before proceeding with upload.")
 				return
+			var/datum/game_mode/nations/mode = get_nations_mode()
+			if(!mode)
+				var/obj/item/aiModule/M = O
+				M.install(src)
+			else
+				if(mode.kickoff)
+					to_chat(user, "<span class='warning'>You have been locked out from modifying the AI's laws!</span>")
+		else
+			..()
 			var/turf/T = get_turf(current)
 			if(!atoms_share_level(T, src))
 				to_chat(user, "<span class='danger'>Unable to establish a connection</span>: You're too far away from the target silicon!")
 				return
-			var/obj/item/aiModule/M = O
-			M.install(src)
-			return
-		return ..()
-
 
 	attack_hand(var/mob/user as mob)
 		if(src.stat & NOPOWER)
@@ -78,10 +82,14 @@
 			if(!atoms_share_level(T, src))
 				to_chat(user, "<span class='danger'>Unable to establish a connection</span>: You're too far away from the target silicon!")
 				return
-			module.install(src)
-			return
-		return ..()
-
+		    var/datum/game_mode/nations/mode = get_nations_mode()
+			if(!mode)
+				module.install(src)
+			else
+				if(mode.kickoff)
+					to_chat(user, "<span class='warning'>You have been locked out from modifying the borg's laws!</span>")
+		else
+			return ..()
 
 	attack_hand(var/mob/user as mob)
 		if(src.stat & NOPOWER)

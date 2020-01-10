@@ -22,7 +22,12 @@
 		..()
 
 /obj/machinery/computer/aifixer/attack_ai(var/mob/user as mob)
-	ui_interact(user)
+	var/datum/game_mode/nations/mode = get_nations_mode()
+	if(!mode)
+		ui_interact(user)
+	else
+		if(mode.kickoff)
+			to_chat(user, "<span class='warning'>You have been locked out from this console!</span>")if(!atoms_share_level(T, src))
 
 /obj/machinery/computer/aifixer/attack_hand(var/mob/user as mob)
 	ui_interact(user)

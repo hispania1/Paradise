@@ -1297,6 +1297,13 @@ var/list/ai_verbs_default = list(
 	return
 
 
+/mob/living/silicon/ai/proc/process_nations_ai()
+	if(client)
+		var/client/C = client
+		for(var/mob/living/carbon/human/H in view(eyeobj, 14))
+			C.images += H.hud_list[NATIONS_HUD]
+
+
 /mob/living/silicon/ai/update_sight()
 	if(!client)
 		return

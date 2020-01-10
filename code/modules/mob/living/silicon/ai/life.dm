@@ -133,6 +133,12 @@
 
 	process_queued_alarms()
 
+	if(get_nations_mode())
+		process_nations_ai()
+
+	if(get_nations_mode())
+		process_nations_ai()
+
 /mob/living/silicon/ai/updatehealth(reason = "none given")
 	if(status_flags & GODMODE)
 		health = 100
