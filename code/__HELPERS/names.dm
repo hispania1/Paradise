@@ -5,12 +5,12 @@ var/church_name = null
 
 	var/name = ""
 
-	name += pick("Holy", "United", "First", "Second", "Last")
+	name += pick("Sagrado", "Unido", "Primero", "Segundo", "Último")
 
 	if(prob(20))
 		name += " Space"
 
-	name += " " + pick("Church", "Cathedral", "Body", "Worshippers", "Movement", "Witnesses")
+	name += " " + pick("Iglesia", "Catedral", "Cuerpo", "Adoradores", "Movimiento", "Testigos")
 	name += " of [religion_name()]"
 
 	return name
@@ -26,8 +26,8 @@ var/religion_name = null
 
 	var/name = ""
 
-	name += pick("bee", "science", "edu", "captain", "civilian", "monkey", "alien", "space", "unit", "sprocket", "gadget", "bomb", "revolution", "beyond", "station", "goon", "robot", "ivor", "hobnob")
-	name += pick("ism", "ia", "ology", "istism", "ites", "ick", "ian", "ity")
+	name += pick("abeja", "ciencias", "edu", "capitan", "civil", "mono", "alien", "espacio", "unidad", "piñon", "gadget", "bomb", "revolution", "beyond", "station", "goon", "robot", "ivor", "hobnob")
+	name += pick("ito", "ia", "ologia", "itismo", "ites", "ick", "ian", "tito")
 
 	return capitalize(name)
 
@@ -44,24 +44,24 @@ var/religion_name = null
 
 	//Rare: Pre-Prefix
 	if(prob(10))
-		name = pick("Imperium", "Heretical", "Cuban", "Psychic", "Elegant", "Common", "Uncommon", "Rare", "Unique", "Houseruled", "Religious", "Atheist", "Traditional", "Houseruled", "Mad", "Super", "Ultra", "Secret", "Top Secret", "Deep", "Death", "Zybourne", "Central", "Main", "Government", "Uoi", "Fat", "Automated", "Experimental", "Augmented")
+		name = pick("Imperial", "Heretical", "Cuban", "Psiquis", "Elegante", "Comun", "Infrequente", "Raro", "Unique", "Regulado por la casa", "Religioso", "Ateo", "Tradicional", "Loco", "Super", "Ultra", "Secreto", "Top Secret", "Deep", "Muerte", "Zybourne", "Central", "Principal", "Gobierno", "Uoi", "Gordo", "Automatizado", "Experimental", "Aumentado")
 		new_station_name = name + " "
 		name = ""
 
 	// Prefix
 	for(var/holiday_name in SSholiday.holidays)
-		if(holiday_name == "Friday the 13th")
+		if(holiday_name == "Viernes 13")
 			random = 13
 		var/datum/holiday/holiday = SSholiday.holidays[holiday_name]
 		name = holiday.getStationPrefix()
 		//get normal name
 	if(!name)
-		name = pick("", "Stanford", "Dorf", "Alium", "Prefix", "Clowning", "Aegis", "Ishimura", "Scaredy", "Death-World", "Mime", "Honk", "Rogue", "MacRagge", "Ultrameens", "Safety", "Paranoia", "Explosive", "Neckbear", "Donk", "Muppet", "North", "West", "East", "South", "Slant-ways", "Widdershins", "Rimward", "Expensive", "Procreatory", "Imperial", "Unidentified", "Immoral", "Carp", "Ork", "Pete", "Control", "Nettle", "Aspie", "Class", "Crab", "Fist","Corrogated","Skeleton","Race", "Fatguy", "Gentleman", "Capitalist", "Communist", "Bear", "Beard", "Derp", "Space", "Spess", "Star", "Moon", "System", "Mining", "Neckbeard", "Research", "Supply", "Military", "Orbital", "Battle", "Science", "Asteroid", "Home", "Production", "Transport", "Delivery", "Extraplanetary", "Orbital", "Correctional", "Robot", "Hats", "Pizza")
+		name = pick("", "Stanford", "Dorf", "Alium", "Prefijo", "Clowning", "Aegis", "Ishimura", "Miedoso", "Death-World", "Mimo", "Honk", "Rogue", "MacRagge", "Ultrameens", "Seguridad", "Paranoia", "Explosivo", "Barbduo", "Donk", "Muppet", "Norte", "Oeste", "Este", "Sur", "Caminos", "Semilla", "Palo", "Caro", "Procrastinador", "Imperial", "No-identificado", "Immoral", "Carpa", "Orco", "Pete", "Control", "Nettle", "Aspie", "Clase", "Cangrejo", "Puño","Corroborado","Esqueleto","Raza", "Tipo-Gordo", "Gentleman", "Capitalista", "Communista", "Oso", "Barba", "Sado", "Espacio", "Especimen", "Estrella", "Lunar", "Sistema", "Mineria", "Investigacion", "Cargo", "Militar", "Orbital", "Batalla", "Ciencia", "Asteroide", "Hogar", "Produccion", "Transporte", "Delivery", "Extraplanetario", "Orbital", "Correccional", "Robot", "Sombreros", "Pizza")
 	if(name)
 		new_station_name += name + " "
 
 	// Suffix
-	name = pick("Station", "Fortress", "Frontier", "Suffix", "Death-trap", "Space-hulk", "Lab", "Hazard","Spess Junk", "Fishery", "No-Moon", "Tomb", "Crypt", "Hut", "Monkey", "Bomb", "Trade Post", "Fortress", "Village", "Town", "City", "Edition", "Hive", "Complex", "Base", "Facility", "Depot", "Outpost", "Installation", "Drydock", "Observatory", "Array", "Relay", "Monitor", "Platform", "Construct", "Hangar", "Prison", "Center", "Port", "Waystation", "Factory", "Waypoint", "Stopover", "Hub", "HQ", "Office", "Object", "Fortification", "Colony", "Planet-Cracker", "Roost", "Fat Camp")
+	name = pick("Estacion", "Fortaleza", "Fronterizo", "Sufijo", "Trampa-Muerte", "Hulk-Espacial", "Laboratorio", "Hazard","Basura de especie", "Pescado", "No-Lunar", "Tumba", "Cripta", "Cabaña", "Mono", "Bomba", "Puesto comercial", "Fortaleza", "Villa", "Pueblo", "Ciudad", "Edicion", "Colmena", "Complejo", "Base", "Facility", "Depot", "Outpost", "Instalacion", "Drydock", "Observatorio", "Arreglo", "Relevo", "Monitor", "Platforma", "Construccion", "Hangar", "Prision", "Centro", "Puerto", "Waystation", "Fabrica", "Punto de encuentro", "Parada", "Hub", "HQ", "Oficina", "Objeto", "Fortificacion", "Colonia", "Planet-Galleta", "Viejo", "Campo gordura")
 	new_station_name += name + " "
 
 	// ID Number
