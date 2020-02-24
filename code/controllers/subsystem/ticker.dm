@@ -76,9 +76,16 @@ SUBSYSTEM_DEF(ticker)
 			to_chat(world, "Por favor, prepara tu personaje y selecciona Ready. El juego comenzara en [config.pregame_timestart] segundos")
 			current_state = GAME_STATE_PREGAME
 			fire() // TG says this is a good idea
+			spawn((config.pregame_timestart * 10) - 1000)
+				for(var/mob/new_player/player in GLOB.player_list)
+					if(!player.ready)
+						to_chat(player, "No olvides seleccionar ready! De esa forma saldran mas modos de juego")
+						player << sound('sound/hispania/misc/get_ready.ogg')
 			spawn((config.pregame_timestart * 10) - 500)
-				to_chat(world, "No olvides seleccionar ready! De esa forma saldran mas modos de juego")
-				world << sound('sound/ambience/alarm4.ogg')
+				for(var/mob/new_player/player in GLOB.player_list)
+					if(!player.ready)
+						to_chat(player, "La ronda esta por empezar")
+						player << sound('sound/hispania/misc/countdown.ogg')
 		if(GAME_STATE_PREGAME)
 			if(!going)
 				return
