@@ -72,10 +72,13 @@ SUBSYSTEM_DEF(ticker)
 		if(GAME_STATE_STARTUP)
 			// This is ran as soon as the MC starts firing, and should only run ONCE, unless startup fails
 			round_start_time = world.time + (config.pregame_timestart * 10)
-			to_chat(world, "<B><FONT color='blue'>Welcome to the pre-game lobby!</FONT></B>")
-			to_chat(world, "Please, setup your character and select ready. Game will start in [config.pregame_timestart] seconds")
+			to_chat(world, "<B><FONT color='blue'>Bienvenido al lobby!</FONT></B>")
+			to_chat(world, "Por favor, prepara tu personaje y selecciona Ready. El juego comenzara en [config.pregame_timestart] segundos")
 			current_state = GAME_STATE_PREGAME
 			fire() // TG says this is a good idea
+			spawn((config.pregame_timestart * 10) - 500)
+				to_chat(world, "No olvides seleccionar ready! De esa forma saldran mas modos de juego")
+				world << sound('sound/ambience/alarm4.ogg')
 		if(GAME_STATE_PREGAME)
 			if(!going)
 				return
