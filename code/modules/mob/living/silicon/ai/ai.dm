@@ -38,7 +38,7 @@ var/list/ai_verbs_default = list(
 	name = "AI"
 	icon = 'icons/mob/ai.dmi'//
 	icon_state = "ai"
-	move_resist = MOVE_FORCE_VERY_STRONG
+	move_resist = MOVE_FORCE_NORMAL
 	density = 1
 	status_flags = CANSTUN|CANPARALYSE|CANPUSH
 	mob_size = MOB_SIZE_LARGE
@@ -101,6 +101,9 @@ var/list/ai_verbs_default = list(
 	var/obj/machinery/camera/portable/builtInCamera
 
 	var/obj/structure/AIcore/deactivated/linked_core //For exosuit control
+	var/mob/living/silicon/robot/deployed_shell = null //For shell control
+	var/datum/action/innate/deploy_shell/deploy_action = new
+	var/datum/action/innate/deploy_last_shell/redeploy_action = new
 
 	var/arrivalmsg = "$name, $rank, has arrived on the station."
 
@@ -163,6 +166,7 @@ var/list/ai_verbs_default = list(
 	additional_law_channels["Holopad"] = ":h"
 
 	aiCamera = new/obj/item/camera/siliconcam/ai_camera(src)
+	deploy_action.Grant(src)
 
 	if(isturf(loc))
 		add_ai_verbs(src)
@@ -172,6 +176,7 @@ var/list/ai_verbs_default = list(
 	add_language("Galactic Common", 1)
 	add_language("Sol Common", 1)
 	add_language("Tradeband", 1)
+	add_language("Neo-Russkiya", 0)
 	add_language("Gutter", 0)
 	add_language("Sinta'unathi", 0)
 	add_language("Siik'tajr", 0)
@@ -245,6 +250,8 @@ var/list/ai_verbs_default = list(
 	stat(null, text("Connected cyborgs: [connected_robots.len]"))
 	for(var/mob/living/silicon/robot/R in connected_robots)
 		var/robot_status = "Nominal"
+		if(R.shell)
+			robot_status = "AI SHELL"
 		if(R.stat || !R.client)
 			robot_status = "OFFLINE"
 		else if(!R.cell || R.cell.charge <= 0)
@@ -253,6 +260,7 @@ var/list/ai_verbs_default = list(
 		var/area/A = get_area(R)
 		stat(null, text("[R.name] | S.Integrity: [R.health]% | Cell: [R.cell ? "[R.cell.charge] / [R.cell.maxcharge]" : "Empty"] | \
 		Module: [R.designation] | Loc: [sanitize(A.name)] | Status: [robot_status]"))
+	stat(null, text("AI shell beacons detected: [LAZYLEN(available_ai_shells)]")) //Count of total AI shells
 
 /mob/living/silicon/ai/rename_character(oldname, newname)
 	if(!..(oldname, newname))
@@ -498,7 +506,7 @@ var/list/ai_verbs_default = list(
 	if(check_unable(AI_CHECK_WIRELESS))
 		return
 
-	var/input = input(usr, "Please enter the reason for calling the shuttle.", "Shuttle Call Reason.","") as text|null
+	var/input = clean_input("Please enter the reason for calling the shuttle.", "Shuttle Call Reason.","")
 	if(!input || stat)
 		return
 
@@ -534,14 +542,12 @@ var/list/ai_verbs_default = list(
 	if(!isturf(loc)) // if their location isn't a turf
 		return // stop
 
-	var/is_anchored = FALSE
-	if(move_resist == MOVE_FORCE_VERY_STRONG)
-		move_resist = MOVE_FORCE_VERY_STRONG
+	if(anchored)
+		anchored = FALSE
 	else
-		is_anchored = TRUE
-		move_resist = MOVE_FORCE_NORMAL
+		anchored = TRUE
 
-	to_chat(src, "[is_anchored ? "<b>You are now anchored.</b>" : "<b>You are now unanchored.</b>"]")
+	to_chat(src, "[anchored ? "<b>You are now anchored.</b>" : "<b>You are now unanchored.</b>"]")
 
 /mob/living/silicon/ai/update_canmove()
 	return FALSE
@@ -562,16 +568,18 @@ var/list/ai_verbs_default = list(
 	user.reset_perspective(current)
 	return TRUE
 
-/mob/living/silicon/ai/blob_act()
-	if(stat != 2)
+/mob/living/silicon/ai/blob_act(obj/structure/blob/B)
+	if(stat != DEAD)
 		adjustBruteLoss(60)
-		return TRUE
-	return FALSE
+		updatehealth()
+		return 1
+	return 0
 
 /mob/living/silicon/ai/restrained()
 	return FALSE
 
 /mob/living/silicon/ai/emp_act(severity)
+	disconnect_shell()
 	if(prob(30))
 		switch(pick(1,2))
 			if(1)
@@ -636,7 +644,7 @@ var/list/ai_verbs_default = list(
 		return
 
 	if(href_list["trackbot"])
-		var/mob/living/simple_animal/bot/target = locate(href_list["trackbot"]) in GLOB.simple_animal_list
+		var/mob/living/simple_animal/bot/target = locate(href_list["trackbot"]) in GLOB.bots_list
 		if(target)
 			ai_actual_track(target)
 		else
@@ -644,7 +652,7 @@ var/list/ai_verbs_default = list(
 		return
 
 	if(href_list["callbot"]) //Command a bot to move to a selected location.
-		Bot = locate(href_list["callbot"]) in GLOB.simple_animal_list
+		Bot = locate(href_list["callbot"]) in GLOB.bots_list
 		if(!Bot || Bot.remote_disabled || control_disabled)
 			return //True if there is no bot found, the bot is manually emagged, or the AI is carded with wireless off.
 		waypoint_mode = 1
@@ -652,7 +660,7 @@ var/list/ai_verbs_default = list(
 		return
 
 	if(href_list["interface"]) //Remotely connect to a bot!
-		Bot = locate(href_list["interface"]) in GLOB.simple_animal_list
+		Bot = locate(href_list["interface"]) in GLOB.bots_list
 		if(!Bot || Bot.remote_disabled || control_disabled)
 			return
 		Bot.attack_ai(src)
@@ -748,7 +756,7 @@ var/list/ai_verbs_default = list(
 	d += "<A HREF=?src=[UID()];botrefresh=\ref[Bot]>Query network status</A><br>"
 	d += "<table width='100%'><tr><td width='40%'><h3>Name</h3></td><td width='20%'><h3>Status</h3></td><td width='30%'><h3>Location</h3></td><td width='10%'><h3>Control</h3></td></tr>"
 
-	for(var/mob/living/simple_animal/bot/Bot in GLOB.simple_animal_list)
+	for(var/mob/living/simple_animal/bot/Bot in GLOB.bots_list)
 		if(is_ai_allowed(Bot.z) && !Bot.remote_disabled) //Only non-emagged bots on the allowed Z-level are detected!
 			bot_area = get_area(Bot)
 			d += "<tr><td width='30%'>[Bot.hacked ? "<span class='bad'>(!) </span>[Bot.name]" : Bot.name] ([Bot.model])</td>"
@@ -1076,7 +1084,7 @@ var/list/ai_verbs_default = list(
 	set desc = "Change the message that's transmitted when a new crew member arrives on station."
 	set category = "AI Commands"
 
-	var/newmsg = input("What would you like the arrival message to be? List of options: $name, $rank, $species, $gender, $age", "Change Arrival Message", arrivalmsg) as text
+	var/newmsg = clean_input("What would you like the arrival message to be? List of options: $name, $rank, $species, $gender, $age", "Change Arrival Message", arrivalmsg)
 	if(newmsg != arrivalmsg)
 		arrivalmsg = newmsg
 		to_chat(usr, "The arrival message has been successfully changed.")
@@ -1113,7 +1121,7 @@ var/list/ai_verbs_default = list(
 				user.visible_message("<span class='notice'>\The [user] decides not to unbolt \the [src].</span>")
 				return
 			user.visible_message("<span class='notice'>\The [user] finishes unfastening \the [src]!</span>")
-			anchored = 0
+			anchored = FALSE
 			return
 		else
 			user.visible_message("<span class='notice'>\The [user] starts to bolt \the [src] to the plating...</span>")
@@ -1121,11 +1129,13 @@ var/list/ai_verbs_default = list(
 				user.visible_message("<span class='notice'>\The [user] decides not to bolt \the [src].</span>")
 				return
 			user.visible_message("<span class='notice'>\The [user] finishes fastening down \the [src]!</span>")
-			anchored = 1
+			anchored = TRUE
 			return
 	else
 		return ..()
 
+/mob/living/silicon/ai/welder_act()
+	return
 
 /mob/living/silicon/ai/proc/control_integrated_radio()
 	set name = "Radio Settings"
@@ -1164,6 +1174,7 @@ var/list/ai_verbs_default = list(
 	if(!..())
 		return
 	if(interaction == AI_TRANS_TO_CARD)//The only possible interaction. Upload AI mob to a card.
+		disconnect_shell() //If the AI is controlling a borg, force the player back to core!
 		if(!mind)
 			to_chat(user, "<span class='warning'>No intelligence patterns detected.</span>")//No more magical carding of empty cores, AI RETURN TO BODY!!!11
 			return
@@ -1174,6 +1185,9 @@ var/list/ai_verbs_default = list(
 		loc = card//Throw AI into the card.
 		to_chat(src, "You have been downloaded to a mobile storage device. Remote device connection severed.")
 		to_chat(user, "<span class='boldnotice'>Transfer successful</span>: [name] ([rand(1000,9999)].exe) removed from host terminal and stored within local memory.")
+
+/mob/living/silicon/ai/can_buckle()
+	return FALSE
 
 // Pass lying down or getting up to our pet human, if we're in a rig.
 /mob/living/silicon/ai/lay_down()
@@ -1198,7 +1212,8 @@ var/list/ai_verbs_default = list(
 	if(isturf(loc)) //AI in core, check if on cameras
 		//get_turf_pixel() is because APCs in maint aren't actually in view of the inner camera
 		//apc_override is needed here because AIs use their own APC when depowered
-		return (cameranet && cameranet.checkTurfVis(get_turf_pixel(A))) || apc_override
+		var/turf/T = isturf(A) ? A : get_turf_pixel(A)
+		return (cameranet && cameranet.checkTurfVis(T)) || apc_override
 	//AI is carded/shunted
 	//view(src) returns nothing for carded/shunted AIs and they have x-ray vision so just use get_dist
 	var/list/viewscale = getviewsize(client.view)
@@ -1293,3 +1308,26 @@ var/list/ai_verbs_default = list(
 
 /mob/living/silicon/ai/ExtinguishMob()
 	return
+
+
+/mob/living/silicon/ai/update_sight()
+	if(!client)
+		return
+
+	if(stat == DEAD)
+		grant_death_vision()
+		return
+
+	see_invisible = initial(see_invisible)
+	see_in_dark = initial(see_in_dark)
+	sight = initial(sight)
+	lighting_alpha = initial(lighting_alpha)
+
+	if(aiRestorePowerRoutine)
+		sight = sight &~ SEE_TURFS
+		sight = sight &~ SEE_MOBS
+		sight = sight &~ SEE_OBJS
+		see_in_dark = 0
+
+	SEND_SIGNAL(src, COMSIG_MOB_UPDATE_SIGHT)
+	sync_lighting_plane_alpha()

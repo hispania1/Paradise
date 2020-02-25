@@ -44,7 +44,7 @@
 			visible_message("<span class='notice'>[user] sticks \a [O] into \the [src].</span>")
 			brainmob = B.brainmob
 			B.brainmob = null
-			brainmob.loc = src
+			brainmob.forceMove(src)
 			brainmob.container = src
 			brainmob.stat = CONSCIOUS
 			GLOB.respawnable_list -= brainmob
@@ -90,25 +90,28 @@
 		return
 
 	// Maybe later add encryption key support, but that's a pain in the neck atm
-	if(isscrewdriver(O))
-		if(radio)
-			user.visible_message("<span class='warning'>[user] begins to uninstall the radio from [src]...</span>", \
-								 "<span class='notice'>You start to uninstall the radio from [src]...</span>")
-			if(do_after(user, 40 * O.toolspeed, target = src))
-				uninstall_radio()
-				new /obj/item/mmi_radio_upgrade(get_turf(src))
-				user.visible_message("<span class='warning'>[user] uninstalls the radio from [src].</span>", \
-									 "<span class='notice'>You uninstall the radio from [src].</span>")
-		else
-			to_chat(user, "<span class='warning'>There is no radio in [src]!</span>")
-		return
 
 	if(brainmob)
 		O.attack(brainmob, user)//Oh noooeeeee
 		// Brainmobs can take damage, but they can't actually die. Maybe should fix.
 		return
-	..()
+	return ..()
 
+/obj/item/mmi/screwdriver_act(mob/user, obj/item/I)
+	. = TRUE
+	if(!I.tool_use_check(user, 0))
+		return
+	if(!radio)
+		to_chat(user, "<span class='warning'>There is no radio in [src]!</span>")
+		return
+	user.visible_message("<span class='warning'>[user] begins to uninstall the radio from [src]...</span>", \
+							 "<span class='notice'>You start to uninstall the radio from [src]...</span>")
+	if(!I.use_tool(src, user, 40, volume = I.tool_volume) || !radio)
+		return
+	uninstall_radio()
+	new /obj/item/mmi_radio_upgrade(get_turf(src))
+	user.visible_message("<span class='warning'>[user] uninstalls the radio from [src].</span>", \
+						 "<span class='notice'>You uninstall the radio from [src].</span>")
 
 
 /obj/item/mmi/attack_self(mob/user as mob)
@@ -152,7 +155,7 @@
 		held_brain.name = "\the [brainmob.name]'s [initial(held_brain.name)]"
 
 	brainmob.container = null//Reset brainmob mmi var.
-	brainmob.loc = held_brain//Throw mob into brain.
+	brainmob.forceMove(held_brain) //Throw mob into brain.
 	GLOB.respawnable_list += brainmob
 	GLOB.living_mob_list -= brainmob//Get outta here
 	held_brain.brainmob = brainmob//Set the brain to use the brainmob
@@ -169,7 +172,7 @@
 /obj/item/mmi/examine(mob/user)
 	. = ..()
 	if(radio)
-		to_chat(user, "<span class='notice'>A radio is installed on [src].</span>")
+		. += "<span class='notice'>A radio is installed on [src].</span>"
 
 /obj/item/mmi/proc/install_radio()
 	radio = new(src)

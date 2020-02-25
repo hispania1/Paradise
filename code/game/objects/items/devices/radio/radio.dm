@@ -22,6 +22,7 @@ var/global/list/default_medbay_channels = list(
 /obj/item/radio
 	icon = 'icons/obj/radio.dmi'
 	name = "station bounced radio"
+	dog_fashion = /datum/dog_fashion/back
 	suffix = "\[3\]"
 	icon_state = "walkietalkie"
 	item_state = "walkietalkie"
@@ -38,6 +39,7 @@ var/global/list/default_medbay_channels = list(
 	var/subspace_transmission = 0
 	var/obj/item/encryptionkey/syndicate/syndiekey = null //Holder for the syndicate encryption key if present
 	var/disable_timer = 0 //How many times this is disabled by EMPs
+	var/syndie = FALSE
 
 	var/is_special = 0 //For electropacks mostly, skips Topic() checks
 
@@ -59,9 +61,9 @@ var/global/list/default_medbay_channels = list(
 
 
 /obj/item/radio/proc/set_frequency(new_frequency)
-	radio_controller.remove_object(src, frequency)
+	SSradio.remove_object(src, frequency)
 	frequency = new_frequency
-	radio_connection = radio_controller.add_object(src, frequency, RADIO_CHAT)
+	radio_connection = SSradio.add_object(src, frequency, RADIO_CHAT)
 
 
 /obj/item/radio/New()
@@ -73,10 +75,10 @@ var/global/list/default_medbay_channels = list(
 
 /obj/item/radio/Destroy()
 	QDEL_NULL(wires)
-	if(radio_controller)
-		radio_controller.remove_object(src, frequency)
+	if(SSradio)
+		SSradio.remove_object(src, frequency)
 		for(var/ch_name in channels)
-			radio_controller.remove_object(src, radiochannels[ch_name])
+			SSradio.remove_object(src, SSradio.radiochannels[ch_name])
 	radio_connection = null
 	GLOB.global_radios -= src
 	follow_target = null
@@ -90,7 +92,7 @@ var/global/list/default_medbay_channels = list(
 	set_frequency(frequency)
 
 	for(var/ch_name in channels)
-		secure_radio_connections[ch_name] = radio_controller.add_object(src, radiochannels[ch_name],  RADIO_CHAT)
+		secure_radio_connections[ch_name] = SSradio.add_object(src, SSradio.radiochannels[ch_name],  RADIO_CHAT)
 
 /obj/item/radio/attack_ghost(mob/user)
 	return interact(user)
@@ -147,7 +149,7 @@ var/global/list/default_medbay_channels = list(
 		var/chan_stat = channels[ch_name]
 		var/listening = !!(chan_stat & FREQ_LISTENING) != 0
 
-		dat.Add(list(list("chan" = ch_name, "display_name" = ch_name, "secure_channel" = 1, "sec_channel_listen" = !listening, "chan_span" = frequency_span_class(radiochannels[ch_name]))))
+		dat.Add(list(list("chan" = ch_name, "display_name" = ch_name, "secure_channel" = 1, "sec_channel_listen" = !listening, "chan_span" = SSradio.frequency_span_class(SSradio.radiochannels[ch_name]))))
 
 	return dat
 
@@ -155,7 +157,7 @@ var/global/list/default_medbay_channels = list(
 	var/dat[0]
 	for(var/internal_chan in internal_channels)
 		if(has_channel_access(user, internal_chan))
-			dat.Add(list(list("chan" = internal_chan, "display_name" = get_frequency_name(text2num(internal_chan)), "chan_span" = frequency_span_class(text2num(internal_chan)))))
+			dat.Add(list(list("chan" = internal_chan, "display_name" = get_frequency_name(text2num(internal_chan)), "chan_span" = SSradio.frequency_span_class(text2num(internal_chan)))))
 
 	return dat
 
@@ -396,8 +398,7 @@ var/global/list/default_medbay_channels = list(
 	if(ishuman(M))
 		var/mob/living/carbon/human/H = M
 		displayname = H.voice
-		if(H.voice != real_name)	
-			jobname = "Unknown"
+		if(H.voice != real_name)
 			voicemask = TRUE
 
 	if(syndiekey && syndiekey.change_voice && connection.frequency == SYND_FREQ)
@@ -555,7 +556,7 @@ var/global/list/default_medbay_channels = list(
 		var/turf/position = get_turf(src)
 		if(!position || !(position.z in level))
 			return -1
-	if(freq in ANTAG_FREQS)
+	if(freq in SSradio.ANTAG_FREQS)
 		if(!(syndiekey))//Checks to see if it's allowed on that frequency, based on the encryption keys
 			return -1
 	if(!freq) //recieved on main frequency
@@ -595,31 +596,38 @@ var/global/list/default_medbay_channels = list(
 
 	return null
 
-/obj/item/radio/examine(mob/user, var/distance = -1)
-	. = ..(user, distance)
-	if((in_range(src, user) || loc == user))
+/obj/item/radio/examine(mob/user)
+	. = ..()
+	if(in_range(src, user) || loc == user)
 		if(b_stat)
-			user.show_message("<span class='notice'>\the [src] can be attached and modified!</span>")
+			. += "<span class='notice'>\the [src] can be attached and modified!</span>"
 		else
-			user.show_message("<span class='notice'>\the [src] can not be modified or attached!</span>")
-	return .
+			. += "<span class='notice'>\the [src] can not be modified or attached!</span>"
 
-/obj/item/radio/attackby(obj/item/W as obj, mob/user as mob, params)
-	..()
-	user.set_machine(src)
-	if(!( istype(W, /obj/item/screwdriver) ))
+/obj/item/radio/screwdriver_act(mob/user, obj/item/I)
+	. = TRUE
+	if(!I.use_tool(src, user, 0, volume = I.tool_volume))
 		return
-	b_stat = !( b_stat )
+	user.set_machine(src)
+	b_stat = !b_stat
 	if(!istype(src, /obj/item/radio/beacon))
 		if(b_stat)
 			user.show_message("<span class='notice'>The radio can now be attached and modified!</span>")
 		else
 			user.show_message("<span class='notice'>The radio can no longer be modified or attached!</span>")
 		updateDialog()
-			//Foreach goto(83)
-		add_fingerprint(user)
+
+/obj/item/radio/wirecutter_act(mob/user, obj/item/I)
+	. = TRUE
+	if(!I.use_tool(src, user, 0, volume = I.tool_volume))
 		return
-	else return
+	interact(user)
+
+/obj/item/radio/multitool_act(mob/user, obj/item/I)
+	. = TRUE
+	if(!I.use_tool(src, user, 0, volume = I.tool_volume))
+		return
+	interact(user)
 
 /obj/item/radio/emp_act(severity)
 	on = 0
@@ -654,6 +662,7 @@ var/global/list/default_medbay_channels = list(
 	icon_state = "radio"
 	canhear_range = 0
 	subspace_transmission = 1
+	dog_fashion = null
 
 /obj/item/radio/borg/syndicate
 	keyslot = new /obj/item/encryptionkey/syndicate/nukeops
@@ -689,33 +698,8 @@ var/global/list/default_medbay_channels = list(
 	set_frequency(ERT_FREQ)
 
 /obj/item/radio/borg/attackby(obj/item/W as obj, mob/user as mob, params)
-//	..()
-	user.set_machine(src)
-	if(!( istype(W, /obj/item/screwdriver) || (istype(W, /obj/item/encryptionkey/ ))))
-		return
-
-	if(istype(W, /obj/item/screwdriver))
-		if(keyslot)
-
-
-			for(var/ch_name in channels)
-				radio_controller.remove_object(src, radiochannels[ch_name])
-				secure_radio_connections[ch_name] = null
-
-
-			if(keyslot)
-				var/turf/T = get_turf(user)
-				if(T)
-					keyslot.loc = T
-					keyslot = null
-
-			recalculateChannels()
-			to_chat(user, "You pop out the encryption key in the radio!")
-
-		else
-			to_chat(user, "This radio doesn't have any encryption keys!")
-
 	if(istype(W, /obj/item/encryptionkey/))
+		user.set_machine(src)
 		if(keyslot)
 			to_chat(user, "The radio can't hold another key!")
 			return
@@ -726,8 +710,32 @@ var/global/list/default_medbay_channels = list(
 			keyslot = W
 
 		recalculateChannels()
+	else
+		return ..()
 
-	return
+/obj/item/radio/borg/screwdriver_act(mob/user, obj/item/I)
+	. = TRUE
+	if(!I.use_tool(src, user, 0, volume = 0))
+		return
+	user.set_machine(src)
+	if(keyslot)
+		for(var/ch_name in channels)
+			SSradio.remove_object(src, SSradio.radiochannels[ch_name])
+			secure_radio_connections[ch_name] = null
+
+
+		if(keyslot)
+			var/turf/T = get_turf(user)
+			if(T)
+				keyslot.loc = T
+				keyslot = null
+
+		recalculateChannels()
+		to_chat(user, "You pop out the encryption key in the radio!")
+		I.play_tool_sound(user, I.tool_volume)
+
+	else
+		to_chat(user, "This radio doesn't have any encryption keys!")
 
 /obj/item/radio/borg/proc/recalculateChannels()
 	channels = list()
@@ -752,13 +760,13 @@ var/global/list/default_medbay_channels = list(
 
 
 	for(var/ch_name in channels)
-		if(!radio_controller)
-			sleep(30) // Waiting for the radio_controller to be created.
-		if(!radio_controller)
+		if(!SSradio)
+			sleep(30) // Waiting for SSradio to be created.
+		if(!SSradio)
 			name = "broken radio"
 			return
 
-		secure_radio_connections[ch_name] = radio_controller.add_object(src, radiochannels[ch_name],  RADIO_CHAT)
+		secure_radio_connections[ch_name] = SSradio.add_object(src, SSradio.radiochannels[ch_name],  RADIO_CHAT)
 
 	return
 
@@ -829,18 +837,19 @@ var/global/list/default_medbay_channels = list(
 	return data
 
 /obj/item/radio/proc/config(op)
-	if(radio_controller)
+	if(SSradio)
 		for(var/ch_name in channels)
-			radio_controller.remove_object(src, radiochannels[ch_name])
+			SSradio.remove_object(src, SSradio.radiochannels[ch_name])
 	secure_radio_connections = new
 	channels = op
-	if(radio_controller)
+	if(SSradio)
 		for(var/ch_name in op)
-			secure_radio_connections[ch_name] = radio_controller.add_object(src, radiochannels[ch_name],  RADIO_CHAT)
+			secure_radio_connections[ch_name] = SSradio.add_object(src, SSradio.radiochannels[ch_name],  RADIO_CHAT)
 	return
 
 /obj/item/radio/off
 	listening = 0
+	dog_fashion = /datum/dog_fashion/back
 
 /obj/item/radio/phone
 	broadcasting = 0
@@ -848,6 +857,7 @@ var/global/list/default_medbay_channels = list(
 	icon_state = "red_phone"
 	listening = 1
 	name = "phone"
+	dog_fashion = null
 
 /obj/item/radio/phone/medbay
 	frequency = MED_I_FREQ

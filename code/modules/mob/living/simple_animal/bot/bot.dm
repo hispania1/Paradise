@@ -63,6 +63,7 @@
 	var/new_destination		// pending new destination (waiting for beacon response)
 	var/destination			// destination description tag
 	var/next_destination	// the next destination in the patrol route
+	var/robot_arm = /obj/item/robot_parts/r_arm
 
 	var/blockcount = 0		//number of times retried a blocked path
 	var/awaiting_beacon	= 0	// count of pticks awaiting a beacon response
@@ -145,7 +146,7 @@
 	access_card.access += access_robotics
 	set_custom_texts()
 	Radio = new/obj/item/radio/headset/bot(src)
-
+	Radio.follow_target = src
 	add_language("Galactic Common", 1)
 	add_language("Sol Common", 1)
 	add_language("Tradeband", 1)
@@ -155,8 +156,8 @@
 
 	bot_core = new bot_core_type(src)
 	spawn(30)
-		if(radio_controller && bot_filter)
-			radio_controller.add_object(bot_core, control_freq, bot_filter)
+		if(SSradio && bot_filter)
+			SSradio.add_object(bot_core, control_freq, bot_filter)
 
 	prepare_huds()
 	for(var/datum/atom_hud/data/diagnostic/diag_hud in huds)
@@ -196,8 +197,8 @@
 	if(reset_access_timer_id)
 		deltimer(reset_access_timer_id)
 		reset_access_timer_id = null
-	if(radio_controller && bot_filter)
-		radio_controller.remove_object(bot_core, control_freq)
+	if(SSradio && bot_filter)
+		SSradio.remove_object(bot_core, control_freq)
 	QDEL_NULL(bot_core)
 	return ..()
 
@@ -231,19 +232,19 @@
 		to_chat(user, "<span class='warning'>You need to open maintenance panel first!</span>")
 
 /mob/living/simple_animal/bot/examine(mob/user)
-	..()
+	. = ..()
 	if(health < maxHealth)
 		if(health > maxHealth/3)
-			to_chat(user, "[src]'s parts look loose.")
+			. += "[src]'s parts look loose."
 		else
-			to_chat(user, "[src]'s parts look very loose!")
+			. += "[src]'s parts look very loose!"
 	else
-		to_chat(user, "[src] is in pristine condition.")
+		. += "[src] is in pristine condition."
 
-/mob/living/simple_animal/bot/adjustHealth(amount)
+/mob/living/simple_animal/bot/adjustHealth(amount, updating_health = TRUE)
 	if(amount > 0 && prob(10))
 		new /obj/effect/decal/cleanable/blood/oil(loc)
-	return ..(amount)
+	. = ..()
 
 /mob/living/simple_animal/bot/updatehealth(reason = "none given")
 	..(reason)
@@ -356,25 +357,25 @@
 					user.visible_message("<span class='notice'>[user] uses [W] to pull [paicard] out of [bot_name]!</span>","<span class='notice'>You pull [paicard] out of [bot_name] with [W].</span>")
 					ejectpai(user)
 	else
-		user.changeNext_move(CLICK_CD_MELEE)
-		if(istype(W, /obj/item/weldingtool) && user.a_intent != INTENT_HARM)
-			if(health >= maxHealth)
-				to_chat(user, "<span class='warning'>[src] does not need a repair!</span>")
-				return
-			if(!open)
-				to_chat(user, "<span class='warning'>Unable to repair with the maintenance panel closed!</span>")
-				return
-			var/obj/item/weldingtool/WT = W
-			if(WT.remove_fuel(0, user))
-				adjustHealth(-10)
-				add_fingerprint(user)
-				user.visible_message("[user] repairs [src]!","<span class='notice'>You repair [src].</span>")
-			else
-				to_chat(user, "<span class='warning'>The welder must be on for this task!</span>")
-		else
-			if(W.force) //if force is non-zero
-				do_sparks(5, 1, src)
-			..()
+		return ..()
+
+/mob/living/simple_animal/bot/welder_act(mob/user, obj/item/I)
+	if(user.a_intent != INTENT_HELP)
+		return
+	if(user == src) //No self-repair dummy
+		return
+	. = TRUE
+	if(health >= maxHealth)
+		to_chat(user, "<span class='warning'>[src] does not need a repair!</span>")
+		return
+	if(!open)
+		to_chat(user, "<span class='warning'>Unable to repair with the maintenance panel closed!</span>")
+		return
+	if(!I.use_tool(src, user, volume = I.tool_volume))
+		return
+	adjustBruteLoss(-10)
+	add_fingerprint(user)
+	user.visible_message("[user] repairs [src]!","<span class='notice'>You repair [src].</span>")
 
 /mob/living/simple_animal/bot/bullet_act(obj/item/projectile/Proj)
 	if(Proj && (Proj.damage_type == BRUTE || Proj.damage_type == BURN))
@@ -746,7 +747,7 @@ Pass a positive integer as an argument to override a bot's default speed.
 /mob/living/simple_animal/bot/proc/post_signal_multiple(var/freq, var/list/keyval)
 	if(z != 1) //Bot control will only work on station.
 		return
-	var/datum/radio_frequency/frequency = radio_controller.return_frequency(freq)
+	var/datum/radio_frequency/frequency = SSradio.return_frequency(freq)
 	if(!frequency)
 		return
 
@@ -1106,3 +1107,6 @@ Pass a positive integer as an argument to override a bot's default speed.
 	if(I)
 		I.icon = null
 	path.Cut(1, 2)
+
+/mob/living/simple_animal/bot/proc/drop_part(obj/item/drop_item, dropzone)
+	new drop_item(dropzone)

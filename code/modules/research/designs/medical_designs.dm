@@ -37,7 +37,7 @@
 	desc = "A hand-held scanner able to diagnose robotic injuries."
 	id = "cyborg_analyzer"
 	req_tech = list("programming" = 2, "biotech" = 2, "magnets" = 2)
-	build_type = PROTOLATHE
+	build_type = PROTOLATHE | MECHFAB
 	materials = list(MAT_METAL = 30, MAT_GLASS = 20)
 	build_path = /obj/item/robotanalyzer
 	category = list("Medical")
@@ -52,6 +52,16 @@
 	build_path = /obj/item/healthupgrade
 	category = list("Medical")
 
+/datum/design/handheld_defib
+	name = "Handheld Defibrillator"
+	desc = "A smaller defibrillator only capable of treating cardiac arrest."
+	id = "handheld_defib"
+	req_tech = list("biotech" = 2, "magnets" = 3)
+	build_type = PROTOLATHE
+	materials = list(MAT_METAL = 20, MAT_GLASS = 20)
+	build_path = /obj/item/handheld_defibrillator
+	category = list("Medical")
+
 /datum/design/defib
 	name = "Defibrillator"
 	desc = "A device that delivers powerful shocks to detachable paddles that resuscitate incapacitated patients."
@@ -62,6 +72,15 @@
 	build_path = /obj/item/defibrillator
 	category = list("Medical")
 
+/datum/design/defib_mount
+	name = "Defibrillator Wall Mount"
+	desc = "A wall mount for defibrillator units."
+	id = "defib_mount"
+	req_tech = list("magnets" = 3, "biotech" = 3, "powerstorage" = 4)
+	build_type = PROTOLATHE
+	materials = list(MAT_METAL = 2000, MAT_GLASS = 1000)
+	build_path = /obj/item/mounted/frame/defib_mount
+	category = list("Medical")
 
 /datum/design/sensor_device
 	name = "Handheld Crew Monitor"
@@ -82,7 +101,7 @@
 	materials = list(MAT_METAL = 1000, MAT_GLASS = 500)
 	construction_time = 75
 	build_path = /obj/item/mmi
-	category = list("Misc","Medical")
+	category = list("Medical")
 
 /datum/design/robotic_brain
 	name = "Robotic Brain"
@@ -93,7 +112,7 @@
 	materials = list(MAT_METAL = 1700, MAT_GLASS = 1350, MAT_GOLD = 500) //Gold, because SWAG.
 	construction_time = 75
 	build_path = /obj/item/mmi/robotic_brain
-	category = list("Misc","Medical")
+	category = list("Medical")
 
 /datum/design/mmi_radio_upgrade
 	name = "Man-Machine Interface Radio Upgrade"
@@ -102,16 +121,15 @@
 	req_tech = list("programming" = 3, "biotech" = 2, "engineering" = 2)
 	build_type = PROTOLATHE | MECHFAB
 	materials = list(MAT_METAL = 200)
-	construction_time = 50
 	build_path = /obj/item/mmi_radio_upgrade
-	category = list("Misc","Medical")
+	category = list("Medical")
 
 /datum/design/nanopaste
 	name = "Nanopaste"
 	desc = "A tube of paste containing swarms of repair nanites. Very effective in repairing robotic machinery."
 	id = "nanopaste"
 	req_tech = list("materials" = 3, "engineering" = 2)
-	build_type = PROTOLATHE
+	build_type = PROTOLATHE | MECHFAB
 	materials = list(MAT_METAL = 7000, MAT_GLASS = 7000)
 	build_path = /obj/item/stack/nanopaste
 	category = list("Medical")
@@ -131,7 +149,7 @@
 	desc = "A scalpel augmented with a directed laser, for more precise cutting without blood entering the field. This one looks basic and could be improved."
 	id = "scalpel_laser1"
 	req_tech = list("biotech" = 2, "materials" = 2, "magnets" = 2)
-	build_type = PROTOLATHE
+	build_type = PROTOLATHE | MECHFAB
 	materials = list(MAT_METAL = 2000, MAT_GLASS = 1500)
 	build_path = /obj/item/scalpel/laser/laser1
 	category = list("Medical")
@@ -141,7 +159,7 @@
 	desc = "A scalpel augmented with a directed laser, for more precise cutting without blood entering the field. This one looks somewhat advanced."
 	id = "scalpel_laser2"
 	req_tech = list("biotech" = 3, "materials" = 4, "magnets" = 4)
-	build_type = PROTOLATHE
+	build_type = PROTOLATHE | MECHFAB
 	materials = list(MAT_METAL = 2000, MAT_GLASS = 1500, MAT_SILVER = 1000)
 	build_path = /obj/item/scalpel/laser/laser2
 	category = list("Medical")
@@ -151,7 +169,7 @@
 	desc = "A scalpel augmented with a directed laser, for more precise cutting without blood entering the field. This one looks to be the pinnacle of precision energy cutlery!"
 	id = "scalpel_laser3"
 	req_tech = list("biotech" = 4, "materials" = 6, "magnets" = 5)
-	build_type = PROTOLATHE
+	build_type = PROTOLATHE | MECHFAB
 	materials = list(MAT_METAL = 2000, MAT_GLASS = 1500, MAT_SILVER = 1000, MAT_GOLD = 1000)
 	build_path = /obj/item/scalpel/laser/laser3
 	category = list("Medical")
@@ -161,7 +179,7 @@
 	desc = "A true extension of the surgeon's body, this marvel instantly and completely prepares an incision allowing for the immediate commencement of therapeutic steps."
 	id = "scalpel_manager"
 	req_tech = list("biotech" = 4, "materials" = 7, "magnets" = 5, "programming" = 4)
-	build_type = PROTOLATHE
+	build_type = PROTOLATHE | MECHFAB
 	materials = list(MAT_METAL = 2000, MAT_GLASS = 1500, MAT_SILVER = 1000, MAT_GOLD = 1000, MAT_DIAMOND = 1000)
 	build_path = /obj/item/scalpel/laser/manager
 	category = list("Medical")
@@ -269,7 +287,7 @@
 	construction_time = 40
 	materials = list(MAT_METAL = 600, MAT_GLASS = 400)
 	build_path = /obj/item/organ/internal/cyberimp/eyes/shield
-	category = list("Misc", "Medical")
+	category = list("Medical")
 
 /datum/design/cyberimp_breather
 	name = "Breathing Tube Implant"
@@ -280,7 +298,7 @@
 	construction_time = 35
 	materials = list(MAT_METAL = 600, MAT_GLASS = 250)
 	build_path = /obj/item/organ/internal/cyberimp/mouth/breathing_tube
-	category = list("Misc", "Medical")
+	category = list("Medical")
 
 /datum/design/cyberimp_surgical
 	name = "Surgical Arm Implant"
@@ -291,7 +309,7 @@
 	materials = list(MAT_METAL = 2500, MAT_GLASS = 1500, MAT_SILVER = 1500)
 	construction_time = 200
 	build_path = /obj/item/organ/internal/cyberimp/arm/surgery
-	category = list("Misc", "Medical")
+	category = list("Medical")
 
 /datum/design/cyberimp_toolset
 	name = "Toolset Arm Implant"
@@ -302,7 +320,7 @@
 	materials = list(MAT_METAL = 2500, MAT_GLASS = 1500, MAT_SILVER = 1500)
 	construction_time = 200
 	build_path = /obj/item/organ/internal/cyberimp/arm/toolset
-	category = list("Misc", "Medical")
+	category = list("Medical")
 
 /datum/design/cyberimp_diagnostic_hud
 	name = "Diagnostic HUD implant"
@@ -310,10 +328,9 @@
 	id = "ci-diaghud"
 	req_tech = list("materials" = 5, "engineering" = 4, "programming" = 4, "biotech" = 4)
 	build_type = PROTOLATHE | MECHFAB
-	construction_time = 50
 	materials = list(MAT_METAL = 600, MAT_GLASS = 600, MAT_SILVER = 500, MAT_GOLD = 500)
 	build_path = /obj/item/organ/internal/cyberimp/eyes/hud/diagnostic
-	category = list("Misc", "Medical")
+	category = list("Medical")
 
 /datum/design/cyberimp_medical_hud
 	name = "Medical HUD implant"
@@ -321,10 +338,9 @@
 	id = "ci-medhud"
 	req_tech = list("materials" = 5, "programming" = 4, "biotech" = 4)
 	build_type = PROTOLATHE | MECHFAB
-	construction_time = 50
 	materials = list(MAT_METAL = 600, MAT_GLASS = 600, MAT_SILVER = 500, MAT_GOLD = 500)
 	build_path = /obj/item/organ/internal/cyberimp/eyes/hud/medical
-	category = list("Misc", "Medical")
+	category = list("Medical")
 
 /datum/design/cyberimp_security_hud
 	name = "Security HUD implant"
@@ -332,10 +348,9 @@
 	id = "ci-sechud"
 	req_tech = list("materials" = 5, "programming" = 4, "biotech" = 4, "combat" = 3)
 	build_type = PROTOLATHE | MECHFAB
-	construction_time = 50
 	materials = list(MAT_METAL = 600, MAT_GLASS = 600, MAT_SILVER = 750, MAT_GOLD = 750)
 	build_path = /obj/item/organ/internal/cyberimp/eyes/hud/security
-	category = list("Misc", "Medical")
+	category = list("Medical")
 
 /datum/design/cyberimp_meson
 	name = "Meson scanner implant"
@@ -343,10 +358,9 @@
 	id = "ci-mesonhud"
 	req_tech = list("materials" = 4, "biotech" = 4, "engineering" = 4)
 	build_type = PROTOLATHE | MECHFAB
-	construction_time = 50
 	materials = list(MAT_METAL = 500, MAT_GLASS = 500, MAT_SILVER = 500, MAT_GOLD = 300)
 	build_path = /obj/item/organ/internal/cyberimp/eyes/meson
-	category = list("Misc", "Medical")
+	category = list("Medical")
 
 /datum/design/cyberimp_xray
 	name = "X-Ray implant"
@@ -357,7 +371,7 @@
 	construction_time = 60
 	materials = list(MAT_METAL = 600, MAT_GLASS = 600, MAT_SILVER = 600, MAT_GOLD = 600, MAT_PLASMA = 1000, MAT_URANIUM = 1000, MAT_DIAMOND = 1000, MAT_BLUESPACE = 1000)
 	build_path = /obj/item/organ/internal/cyberimp/eyes/xray
-	category = list("Misc", "Medical")
+	category = list("Medical")
 
 /datum/design/cyberimp_thermals
 	name = "Thermals implant"
@@ -368,7 +382,7 @@
 	construction_time = 60
 	materials = list(MAT_METAL = 600, MAT_GLASS = 600, MAT_SILVER = 600, MAT_GOLD = 600, MAT_PLASMA = 1000, MAT_DIAMOND = 2000)
 	build_path = /obj/item/organ/internal/cyberimp/eyes/thermals
-	category = list("Misc", "Medical")
+	category = list("Medical")
 
 /datum/design/cyberimp_antidrop
 	name = "Anti-Drop implant"
@@ -379,7 +393,7 @@
 	construction_time = 60
 	materials = list(MAT_METAL = 600, MAT_GLASS = 600, MAT_SILVER = 400, MAT_GOLD = 400)
 	build_path = /obj/item/organ/internal/cyberimp/brain/anti_drop
-	category = list("Misc", "Medical")
+	category = list("Medical")
 
 /datum/design/cyberimp_antistun
 	name = "CNS Rebooter implant"
@@ -390,7 +404,7 @@
 	construction_time = 60
 	materials = list(MAT_METAL = 600, MAT_GLASS = 600, MAT_SILVER = 500, MAT_GOLD = 1000)
 	build_path = /obj/item/organ/internal/cyberimp/brain/anti_stun
-	category = list("Misc", "Medical")
+	category = list("Medical")
 
 /datum/design/cyberimp_clownvoice
 	name = "Comical implant"
@@ -401,7 +415,7 @@
 	construction_time = 60
 	materials = list(MAT_METAL = 200, MAT_GLASS = 200, MAT_BANANIUM = 200)
 	build_path = /obj/item/organ/internal/cyberimp/brain/clown_voice
-	category = list("Misc", "Medical")
+	category = list("Medical")
 
 /datum/design/cyberimp_nutriment
 	name = "Nutriment pump implant"
@@ -412,7 +426,7 @@
 	construction_time = 40
 	materials = list(MAT_METAL = 500, MAT_GLASS = 500, MAT_GOLD = 500)
 	build_path = /obj/item/organ/internal/cyberimp/chest/nutriment
-	category = list("Misc", "Medical")
+	category = list("Medical")
 
 /datum/design/cyberimp_nutriment_plus
 	name = "Nutriment pump implant PLUS"
@@ -420,10 +434,9 @@
 	id = "ci-nutrimentplus"
 	req_tech = list("materials" = 5, "powerstorage" = 4, "biotech" = 4)
 	build_type = PROTOLATHE | MECHFAB
-	construction_time = 50
 	materials = list(MAT_METAL = 600, MAT_GLASS = 600, MAT_GOLD = 500, MAT_URANIUM = 750)
 	build_path = /obj/item/organ/internal/cyberimp/chest/nutriment/plus
-	category = list("Misc", "Medical")
+	category = list("Medical")
 
 /datum/design/cyberimp_reviver
 	name = "Reviver implant"
@@ -434,7 +447,7 @@
 	construction_time = 60
 	materials = list(MAT_METAL = 800, MAT_GLASS = 800, MAT_GOLD = 300, MAT_URANIUM = 500)
 	build_path = /obj/item/organ/internal/cyberimp/chest/reviver
-	category = list("Misc", "Medical")
+	category = list("Medical")
 
 /////////////////////////////////////////
 ////////////Regular Implants/////////////
@@ -489,6 +502,7 @@
 	req_tech = list("biotech" = 4, "materials" = 4)
 	build_type = PROTOLATHE | MECHFAB
 	materials = list(MAT_METAL = 500, MAT_GLASS = 500)
+	construction_time = 60
 	build_path = /obj/item/organ/internal/eyes/cybernetic
 	category = list("Medical")
 
@@ -499,6 +513,7 @@
 	req_tech = list("biotech" = 4, "materials" = 4)
 	build_type = PROTOLATHE | MECHFAB
 	materials = list(MAT_METAL = 500, MAT_GLASS = 500)
+	construction_time = 60
 	build_path = /obj/item/organ/internal/liver/cybernetic
 	category = list("Medical")
 
@@ -509,6 +524,7 @@
 	req_tech = list("biotech" = 4, "materials" = 4)
 	build_type = PROTOLATHE | MECHFAB
 	materials = list(MAT_METAL = 500, MAT_GLASS = 500)
+	construction_time = 60
 	build_path = /obj/item/organ/internal/kidneys/cybernetic
 	category = list("Medical")
 
@@ -519,6 +535,7 @@
 	req_tech = list("biotech" = 4, "materials" = 4)
 	build_type = PROTOLATHE | MECHFAB
 	materials = list(MAT_METAL = 500, MAT_GLASS = 500)
+	construction_time = 60
 	build_path = /obj/item/organ/internal/heart/cybernetic
 	category = list("Medical")
 
@@ -529,6 +546,7 @@
 	req_tech = list("biotech" = 5, "materials" = 5, "engineering" = 5)
 	build_type = PROTOLATHE | MECHFAB
 	materials = list(MAT_METAL = 500, MAT_GLASS = 500, MAT_SILVER = 500)
+	construction_time = 60
 	build_path = /obj/item/organ/internal/heart/cybernetic/upgraded
 	category = list("Medical")
 
@@ -539,6 +557,7 @@
 	req_tech = list("biotech" = 4, "materials" = 4)
 	build_type = PROTOLATHE | MECHFAB
 	materials = list(MAT_METAL = 500, MAT_GLASS = 500)
+	construction_time = 60
 	build_path = /obj/item/organ/internal/lungs/cybernetic
 	category = list("Medical")
 
@@ -549,5 +568,6 @@
 	req_tech = list("biotech" = 5, "materials" = 5, "engineering" = 5)
 	build_type = PROTOLATHE | MECHFAB
 	materials = list(MAT_METAL = 500, MAT_GLASS = 500, MAT_SILVER = 500)
+	construction_time = 60
 	build_path = /obj/item/organ/internal/lungs/cybernetic/upgraded
 	category = list("Medical")

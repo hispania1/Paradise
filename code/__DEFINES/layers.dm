@@ -6,7 +6,9 @@
 #define PLANE_SPACE -95
 #define PLANE_SPACE_PARALLAX -90
 
-#define GAME_PLANE 0
+#define FLOOR_PLANE -2
+#define GAME_PLANE -1
+#define BLACKNESS_PLANE 0 //To keep from conflicts with SEE_BLACKNESS internals
 
 #define SPACE_LAYER 1.8
 //#define TURF_LAYER 2 //For easy recordkeeping; this is a byond define
@@ -48,13 +50,16 @@
 #define CLOSED_FIREDOOR_LAYER 3.11
 #define SHUTTER_LAYER 3.12 // HERE BE DRAGONS
 #define ABOVE_OBJ_LAYER 3.2
-#define ABOVE_WINDOW_LAYER 3.3
-#define SIGN_LAYER 3.4
-#define NOT_HIGH_OBJ_LAYER 3.5
-#define HIGH_OBJ_LAYER 3.6
+#define ABOVE_DOOR_LAYER 3.3
+#define ABOVE_WINDOW_LAYER 3.4
+#define LYING_MOB_LAYER  3.5
+#define SIGN_LAYER 3.6
+#define NOT_HIGH_OBJ_LAYER 3.7
+#define HIGH_OBJ_LAYER 3.8
 
-#define BELOW_MOB_LAYER 3.7
-#define LYING_MOB_LAYER 3.8
+#define BELOW_MOB_LAYER 3.9
+#define LYING_MOB_LAYER 3.91
+#define ABOVE_HUMAN_LAYER 4
 //#define MOB_LAYER 4 //For easy recordkeeping; this is a byond define
 #define ABOVE_MOB_LAYER 4.1
 #define WALL_OBJ_LAYER 4.25
@@ -83,23 +88,32 @@
 #define ABOVE_LIGHTING_PLANE 16
 #define ABOVE_LIGHTING_LAYER 16
 
-#define BYOND_LIGHTING_PLANE 17
-#define BYOND_LIGHTING_LAYER 17
+#define FLOOR_OPENSPACE_PLANE 17
+#define OPENSPACE_LAYER 17
+
+#define BYOND_LIGHTING_PLANE 18
+#define BYOND_LIGHTING_LAYER 18
+
+#define CAMERA_STATIC_PLANE 19
+#define CAMERA_STATIC_LAYER 19
 
 //HUD layer defines
 
-#define FULLSCREEN_PLANE 18
-#define FLASH_LAYER 18
-#define FULLSCREEN_LAYER 18.1
-#define UI_DAMAGE_LAYER 18.2
-#define BLIND_LAYER 18.3
-#define CRIT_LAYER 18.4
-#define CURSE_LAYER 18.5
+#define FULLSCREEN_PLANE 20
+#define FLASH_LAYER 20
+#define FULLSCREEN_LAYER 20.1
+#define UI_DAMAGE_LAYER 20.2
+#define BLIND_LAYER 20.3
+#define CRIT_LAYER 20.4
+#define CURSE_LAYER 20.5
 
-#define HUD_PLANE 19
-#define HUD_LAYER 19
-#define ABOVE_HUD_PLANE 20
-#define ABOVE_HUD_LAYER 20
+#define HUD_PLANE 21
+#define HUD_LAYER 21
+#define ABOVE_HUD_PLANE 22
+#define ABOVE_HUD_LAYER 22
 
-#define SPLASHSCREEN_LAYER 21
-#define SPLASHSCREEN_PLANE 21
+#define SPLASHSCREEN_LAYER 23
+#define SPLASHSCREEN_PLANE 23
+
+atom/proc/reset_layer()
+	layer = initial(layer)

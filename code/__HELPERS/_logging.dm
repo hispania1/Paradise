@@ -1,5 +1,5 @@
 //location of the rust-g library
-#define RUST_G "rust_g"
+#define RUST_G (world.system_type == UNIX ? "./librust_g.so" : "./rust_g.dll")
 
 // On Linux/Unix systems the line endings are LF, on windows it's CRLF, admins that don't use notepad++
 // will get logs that are one big line if the system is Linux and they are using notepad.  This solves it by adding CR to every line ending
@@ -91,7 +91,7 @@
 /proc/log_adminsay(text, mob/speaker)
 	if(config.log_adminchat)
 		WRITE_LOG(GLOB.world_game_log, "ADMINSAY: [speaker.simple_info_line()]: [html_decode(text)][log_end]")
-	
+
 /proc/log_qdel(text)
 	WRITE_LOG(GLOB.world_qdel_log, "QDEL: [text]")
 
@@ -137,6 +137,12 @@
 /proc/log_href(text)
 	WRITE_LOG(GLOB.world_href_log, "HREF: [html_decode(text)]")
 
+/proc/log_asset(text)
+	WRITE_LOG(GLOB.world_asset_log, "ASSET: [text]")
+
+/proc/log_runtime_summary(text)
+	WRITE_LOG(GLOB.runtime_summary_log, "[text]")
+
 /**
  * Standardized method for tracking startup times.
  */
@@ -147,7 +153,7 @@
 // A logging proc that only outputs after setup is done, to
 // help devs test initialization stuff that happens a lot
 /proc/log_after_setup(var/message)
-	if(ticker && ticker.current_state > GAME_STATE_SETTING_UP)
+	if(SSticker && SSticker.current_state > GAME_STATE_SETTING_UP)
 		to_chat(world, "<span class='danger'>[message]</span>")
 		log_world(message)
 

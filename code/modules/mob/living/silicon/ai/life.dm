@@ -50,6 +50,7 @@
 	else
 		if(lacks_power())
 			if(!aiRestorePowerRoutine)
+				disconnect_shell()
 				update_blind_effects()
 				aiRestorePowerRoutine = 1
 				update_sight()
@@ -107,6 +108,8 @@
 							aiRestorePowerRoutine = 0
 							update_blind_effects()
 							update_sight()
+							to_chat(src, "Here are your current laws:")
+							show_laws()
 							return
 
 						switch(PRP)
@@ -126,15 +129,10 @@
 								theAPC.attack_ai(src)
 								apc_override = 0
 								aiRestorePowerRoutine = 3
-								to_chat(src, "Here are your current laws:")
-								src.show_laws() //WHY THE FUCK IS THIS HERE
 						sleep(50)
 						theAPC = null
 
 	process_queued_alarms()
-
-	if(get_nations_mode())
-		process_nations_ai()
 
 /mob/living/silicon/ai/updatehealth(reason = "none given")
 	if(status_flags & GODMODE)
@@ -146,7 +144,6 @@
 		diag_hud_set_status()
 		diag_hud_set_health()
 
-
 /mob/living/silicon/ai/proc/lacks_power()
 	var/turf/T = get_turf(src)
 	var/area/A = get_area(src)
@@ -155,22 +152,3 @@
 /mob/living/silicon/ai/rejuvenate()
 	..()
 	add_ai_verbs(src)
-
-/mob/living/silicon/ai/proc/process_nations_ai()
-	if(client)
-		var/client/C = client
-		for(var/mob/living/carbon/human/H in view(eyeobj, 14))
-			C.images += H.hud_list[NATIONS_HUD]
-
-/mob/living/silicon/ai/update_sight()
-	see_invisible = initial(see_invisible)
-	see_in_dark = initial(see_in_dark)
-	sight = initial(sight)
-	if(aiRestorePowerRoutine)
-		sight = sight&~SEE_TURFS
-		sight = sight&~SEE_MOBS
-		sight = sight&~SEE_OBJS
-		see_in_dark = 0
-
-	if(see_override)
-		see_invisible = see_override

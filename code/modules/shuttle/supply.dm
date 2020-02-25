@@ -58,12 +58,10 @@
 
 		var/contcount
 		for(var/atom/A in T.contents)
-			if(istype(A,/atom/movable/lighting_overlay))
-				continue
-			if(istype(A,/obj/machinery/light))
-				continue //hacky but whatever, shuttles need three spots each for this shit
 			if(!A.simulated)
 				continue
+			if(istype(A, /obj/machinery/light))
+				continue //hacky but whatever, shuttles need three spots each for this shit
 			contcount++
 
 		if(contcount)
@@ -210,6 +208,10 @@
 							msg += "<span class='bad'>+0</span>: New sample of \"[capitalize(S.species)]\" is not more potent than existing sample ([SSshuttle.discoveredPlants[S.type]] potency).<br>"
 					else // This is a new discovery!
 						SSshuttle.discoveredPlants[S.type] = S.potency
+						for(var/mob/M in GLOB.player_list)
+							if(M.mind)
+								for(var/datum/job_objective/further_plants/objective in M.mind.job_objectives)
+									objective.unit_completed()
 						msg += "<span class='good'>[S.rarity]</span>: New species discovered: \"[capitalize(S.species)]\". Excellent work.<br>"
 						SSshuttle.points += S.rarity // That's right, no bonus for potency.  Send a crappy sample first to "show improvement" later
 		qdel(MA)
@@ -249,7 +251,8 @@
 		/obj/machinery/clonepod,
 		/obj/effect/hierophant,
 		/obj/item/warp_cube,
-		/obj/machinery/quantumpad
+		/obj/machinery/quantumpad,
+		/obj/structure/extraction_point
 	)
 	if(A)
 		if(is_type_in_list(A, blacklist))
@@ -476,7 +479,7 @@
 			SSnanoui.update_uis(src)
 			return 1
 
-		var/index = copytext(href_list["doorder"], 1, lentext(href_list["doorder"])) //text2num(copytext(href_list["doorder"], 1))
+		var/index = copytext(href_list["doorder"], 1, length(href_list["doorder"])) //text2num(copytext(href_list["doorder"], 1))
 		var/multi = text2num(copytext(href_list["doorder"], -1))
 		if(!isnum(multi))
 			return 1
@@ -657,7 +660,7 @@
 			SSnanoui.update_uis(src)
 			return 1
 
-		var/index = copytext(href_list["doorder"], 1, lentext(href_list["doorder"])) //text2num(copytext(href_list["doorder"], 1))
+		var/index = copytext(href_list["doorder"], 1, length(href_list["doorder"])) //text2num(copytext(href_list["doorder"], 1))
 		var/multi = text2num(copytext(href_list["doorder"], -1))
 		if(!isnum(multi))
 			return 1
@@ -739,7 +742,7 @@
 	return 1
 
 /obj/machinery/computer/supplycomp/proc/post_signal(var/command)
-	var/datum/radio_frequency/frequency = radio_controller.return_frequency(DISPLAY_FREQ)
+	var/datum/radio_frequency/frequency = SSradio.return_frequency(DISPLAY_FREQ)
 
 	if(!frequency) return
 
@@ -750,18 +753,6 @@
 
 	frequency.post_signal(src, status_signal)
 
-/**********
-    MISC
- **********/
-/area/supply/station
-	name = "Supply Shuttle"
-	icon_state = "shuttle3"
-	requires_power = 0
-
-/area/supply/dock
-	name = "Supply Shuttle"
-	icon_state = "shuttle3"
-	requires_power = 0
 
 #undef ORDER_SCREEN_WIDTH
 #undef ORDER_SCREEN_HEIGHT

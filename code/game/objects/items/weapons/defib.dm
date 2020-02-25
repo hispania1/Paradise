@@ -11,7 +11,7 @@
 	w_class = WEIGHT_CLASS_BULKY
 	origin_tech = "biotech=4"
 	actions_types = list(/datum/action/item_action/toggle_paddles)
-	species_fit = list("Vox")
+	armor = list("melee" = 0, "bullet" = 0, "laser" = 0, "energy" = 0, "bomb" = 0, "bio" = 0, "rad" = 0, "fire" = 50, "acid" = 50)
 	sprite_sheets = list(
 		"Vox" = 'icons/mob/species/vox/back.dmi'
 		)
@@ -20,8 +20,11 @@
 	var/safety = 1 //if you can zap people with the defibs on harm mode
 	var/powered = 0 //if there's a cell in the defib with enough power for a revive, blocks paddles from reviving otherwise
 	var/obj/item/twohanded/shockpaddles/paddles
-	var/obj/item/stock_parts/cell/high/bcell = null
+	var/obj/item/stock_parts/cell/high/cell = null
 	var/combat = 0 //can we revive through space suits?
+
+/obj/item/defibrillator/get_cell()
+	return cell
 
 /obj/item/defibrillator/New() //starts without a cell for rnd
 	..()
@@ -32,7 +35,7 @@
 /obj/item/defibrillator/loaded/New() //starts with hicap
 	..()
 	paddles = make_paddles()
-	bcell = new(src)
+	cell = new(src)
 	update_icon()
 	return
 
@@ -41,9 +44,13 @@
 	update_overlays()
 	update_charge()
 
+/obj/item/defibrillator/examine(mob/user)
+	. = ..()
+	. += "<span class='notice'>Ctrl-click to remove the paddles from the defibrillator.</span>"
+
 /obj/item/defibrillator/proc/update_power()
-	if(bcell)
-		if(bcell.charge < paddles.revivecost)
+	if(cell)
+		if(cell.charge < paddles.revivecost)
 			powered = 0
 		else
 			powered = 1
@@ -56,21 +63,21 @@
 		overlays += "[icon_state]-paddles"
 	if(powered)
 		overlays += "[icon_state]-powered"
-	if(!bcell)
+	if(!cell)
 		overlays += "[icon_state]-nocell"
 	if(!safety)
 		overlays += "[icon_state]-emagged"
 
 /obj/item/defibrillator/proc/update_charge()
 	if(powered) //so it doesn't show charge if it's unpowered
-		if(bcell)
-			var/ratio = bcell.charge / bcell.maxcharge
+		if(cell)
+			var/ratio = cell.charge / cell.maxcharge
 			ratio = Ceiling(ratio*4) * 25
 			overlays += "[icon_state]-charge[ratio]"
 
 /obj/item/defibrillator/CheckParts(list/parts_list)
 	..()
-	bcell = locate(/obj/item/stock_parts/cell) in contents
+	cell = locate(/obj/item/stock_parts/cell) in contents
 	update_icon()
 
 /obj/item/defibrillator/ui_action_click()
@@ -83,7 +90,7 @@
 /obj/item/defibrillator/attackby(obj/item/W, mob/user, params)
 	if(istype(W, /obj/item/stock_parts/cell))
 		var/obj/item/stock_parts/cell/C = W
-		if(bcell)
+		if(cell)
 			to_chat(user, "<span class='notice'>[src] already has a cell.</span>")
 		else
 			if(C.maxcharge < paddles.revivecost)
@@ -91,14 +98,14 @@
 				return
 			user.drop_item()
 			W.loc = src
-			bcell = W
+			cell = W
 			to_chat(user, "<span class='notice'>You install a cell in [src].</span>")
 
 	if(istype(W, /obj/item/screwdriver))
-		if(bcell)
-			bcell.update_icon()
-			bcell.loc = get_turf(src.loc)
-			bcell = null
+		if(cell)
+			cell.update_icon()
+			cell.loc = get_turf(src.loc)
+			cell = null
 			to_chat(user, "<span class='notice'>You remove the cell from the [src].</span>")
 
 	update_icon()
@@ -113,7 +120,7 @@
 		to_chat(user, "<span class='notice'>You silently enable [src]'s safety protocols with the card.")
 
 /obj/item/defibrillator/emp_act(severity)
-	if(bcell)
+	if(cell)
 		deductcharge(1000 / severity)
 	if(safety)
 		safety = 0
@@ -175,15 +182,15 @@
 		var/M = get(paddles, /mob)
 		remove_paddles(M)
 	QDEL_NULL(paddles)
-	QDEL_NULL(bcell)
+	QDEL_NULL(cell)
 	return ..()
 
 /obj/item/defibrillator/proc/deductcharge(var/chrgdeductamt)
-	if(bcell)
-		if(bcell.charge < (paddles.revivecost+chrgdeductamt))
+	if(cell)
+		if(cell.charge < (paddles.revivecost+chrgdeductamt))
 			powered = 0
 			update_icon()
-		if(bcell.use(chrgdeductamt))
+		if(cell.use(chrgdeductamt))
 			update_icon()
 			return 1
 		else
@@ -192,8 +199,8 @@
 
 /obj/item/defibrillator/proc/cooldowncheck(var/mob/user)
 	spawn(50)
-		if(bcell)
-			if(bcell.charge >= paddles.revivecost)
+		if(cell)
+			if(cell.charge >= paddles.revivecost)
 				user.visible_message("<span class='notice'>[src] beeps: Unit ready.</span>")
 				playsound(get_turf(src), 'sound/machines/defib_ready.ogg', 50, 0)
 			else
@@ -219,7 +226,7 @@
 /obj/item/defibrillator/compact/loaded/New()
 	..()
 	paddles = make_paddles()
-	bcell = new(src)
+	cell = new(src)
 	update_icon()
 	return
 
@@ -232,7 +239,7 @@
 /obj/item/defibrillator/compact/combat/loaded/New()
 	..()
 	paddles = make_paddles()
-	bcell = new /obj/item/stock_parts/cell/infinite(src)
+	cell = new /obj/item/stock_parts/cell/infinite(src)
 	update_icon()
 	return
 
@@ -253,6 +260,7 @@
 	force = 0
 	throwforce = 6
 	w_class = WEIGHT_CLASS_BULKY
+	resistance_flags = INDESTRUCTIBLE
 	toolspeed = 1
 
 	var/revivecost = 1000
@@ -281,7 +289,7 @@
 	user.visible_message("<span class='danger'>[user] is putting the live paddles on [user.p_their()] chest! It looks like [user.p_theyre()] trying to commit suicide.</span>")
 	defib.deductcharge(revivecost)
 	playsound(get_turf(src), 'sound/machines/defib_zap.ogg', 50, 1, -1)
-	return (OXYLOSS)
+	return OXYLOSS
 
 /obj/item/twohanded/shockpaddles/dropped(mob/user as mob)
 	if(user)
@@ -296,8 +304,10 @@
 	return unwield(user)
 
 /obj/item/twohanded/shockpaddles/on_mob_move(dir, mob/user)
-	if(defib && !(defib.Adjacent(user)))
-		defib.remove_paddles(user)
+	if(defib)
+		var/turf/t = get_turf(defib)
+		if(!t.Adjacent(user))
+			defib.remove_paddles(user)
 
 /obj/item/twohanded/shockpaddles/proc/check_defib_exists(mainunit, var/mob/living/carbon/human/M, var/obj/O)
 	if(!mainunit || !istype(mainunit, /obj/item/defibrillator))	//To avoid weird issues from admin spawns
@@ -309,7 +319,7 @@
 
 /obj/item/twohanded/shockpaddles/attack(mob/M, mob/user)
 	var/tobehealed
-	var/threshold = -config.health_threshold_dead
+	var/threshold = -HEALTH_THRESHOLD_DEAD
 	var/mob/living/carbon/human/H = M
 
 	if(busy)
@@ -486,7 +496,7 @@
 
 /obj/item/borg_defib/attack(mob/M, mob/user)
 	var/tobehealed
-	var/threshold = -config.health_threshold_dead
+	var/threshold = -HEALTH_THRESHOLD_DEAD
 	var/mob/living/carbon/human/H = M
 
 	if(busy)

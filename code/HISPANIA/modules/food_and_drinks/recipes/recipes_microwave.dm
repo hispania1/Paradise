@@ -45,7 +45,12 @@
 	items = list(/obj/item/reagent_containers/food/drinks/mug, /obj/item/reagent_containers/food/snacks/grown/mushroom/amanita, /obj/item/reagent_containers/food/snacks/egg)
 	result = /obj/item/reagent_containers/food/snacks/amanita_mugcake
 
+//HoneyMugcake (for Luka) //
 
+/datum/recipe/microwave/honey_mugcake
+	reagents = list("sugar" = 5, "milk" = 5, "flour" = 5,"honey" = 5)
+	items = list(/obj/item/reagent_containers/food/drinks/mug, /obj/item/reagent_containers/food/snacks/egg)
+	result = /obj/item/reagent_containers/food/snacks/honey_mugcake
 
 /// Soups
 
@@ -53,3 +58,42 @@
 	reagents = list("water" = 10, "sodiumchloride" = 1, "blackpepper" = 1)
 	items = list(/obj/item/reagent_containers/food/snacks/grown/banana, /obj/item/reagent_containers/food/snacks/grown/potato, /obj/item/reagent_containers/food/snacks/grown/carrot, /obj/item/reagent_containers/food/snacks/monkeycube )
 	result = /obj/item/reagent_containers/food/snacks/macacosoup
+
+/datum/recipe/microwave/furamingosoup
+	reagents = list("water" = 10,"sugar" = 5,"milk" = 5,)
+	items = list(
+		/obj/item/reagent_containers/food/snacks/shrimp
+	)
+	result = /obj/item/reagent_containers/food/snacks/furamingosoup
+
+//Arepa descogelada
+
+/datum/recipe/microwave/arepa
+	items = list(
+		/obj/item/reagent_containers/food/snacks/arepa_ice
+	)
+	result = /obj/item/reagent_containers/food/snacks/arepa
+
+
+/////Hot dogs///////
+
+/datum/recipe/microwave/hot_dog
+	items = list(
+		/obj/item/reagent_containers/food/snacks/sausage,
+		/obj/item/reagent_containers/food/snacks/bun
+	)
+	result = /obj/item/reagent_containers/food/snacks/hot_dog
+
+
+/datum/recipe/microwave/butter_dog
+	items = list(
+		/obj/item/reagent_containers/food/snacks/butter,
+		/obj/item/reagent_containers/food/snacks/bun
+	)
+	result = /obj/item/reagent_containers/food/snacks/hot_dog/butter
+
+///Drake steak
+
+/datum/recipe/microwave/drakesteak
+	items = list(/obj/item/reagent_containers/food/snacks/drakemeat, /obj/item/organ/internal/regenerative_core/legion)
+	result = /obj/item/reagent_containers/food/snacks/drakesteak

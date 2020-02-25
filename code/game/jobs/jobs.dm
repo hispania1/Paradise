@@ -55,10 +55,9 @@ var/const/NANO				=(1<<0)
 var/const/BLUESHIELD		=(1<<1)
 var/const/BARBER			=(1<<3)
 var/const/MECHANIC			=(1<<4)
-var/const/BRIGDOC			=(1<<5)
-var/const/JUDGE				=(1<<6)
-var/const/PILOT				=(1<<7)
-var/const/FORENSIC				=(1<<8)
+var/const/JUDGE				=(1<<5)
+var/const/PILOT				=(1<<6)
+var/const/FORENSIC			=(1<<7)
 
 var/list/assistant_occupations = list(
 )
@@ -137,7 +136,6 @@ var/list/security_positions = list(
 	"Warden",
 	"Detective",
 	"Security Officer",
-	"Brig Physician",
 	"Security Pod Pilot",
 	"Magistrate",
 	"Forensic Specialist",
@@ -161,7 +159,6 @@ var/list/whitelisted_positions = list(
 	"Nanotrasen Representative",
 	"Barber",
 	"Mechanic",
-	"Brig Physician",
 	"Magistrate",
 	"Security Pod Pilot",
 )

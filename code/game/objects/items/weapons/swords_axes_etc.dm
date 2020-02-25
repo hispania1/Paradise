@@ -26,6 +26,7 @@
 	w_class = WEIGHT_CLASS_NORMAL
 	var/cooldown = 0
 	var/on = 1
+	var/cooldownTime = 40
 
 /obj/item/melee/classic_baton/attack(mob/target as mob, mob/living/user as mob)
 	if(on)
@@ -51,8 +52,10 @@
 			if(cooldown <= 0)
 				if(ishuman(target))
 					var/mob/living/carbon/human/H = target
-					if(H.check_shields(0, "[user]'s [name]", src, MELEE_ATTACK))
-						return 0
+					if(H.check_shields(src, 0, "[user]'s [name]", MELEE_ATTACK))
+						return
+					if(check_martial_counter(H, user))
+						return
 				playsound(get_turf(src), 'sound/effects/woodhit.ogg', 75, 1, -1)
 				target.Weaken(3)
 				add_attack_logs(user, target, "Stunned with [src]")
@@ -64,7 +67,7 @@
 				else
 					target.LAssailant = user
 				cooldown = 1
-				spawn(40)
+				spawn(cooldownTime) // 40
 					cooldown = 0
 		return
 	else
@@ -85,6 +88,7 @@
 	name = "telescopic baton"
 	desc = "A compact yet robust personal defense weapon. Can be concealed when folded."
 	icon_state = "telebaton_0"
+	cooldownTime = 50
 	item_state = null
 	slot_flags = SLOT_BELT
 	w_class = WEIGHT_CLASS_SMALL

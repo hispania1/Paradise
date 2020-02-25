@@ -10,6 +10,7 @@
 !config/**/*/
 
 #ignore other, specific files and folers
+*.before
 data/
 /_maps/map_files/backup/*
 /_maps/map_files/**/backup/*
@@ -21,3 +22,4 @@ data/
 stddef.dm
 .atom-build.json
 *.vscode/*
+!/.vscode/extensions.json

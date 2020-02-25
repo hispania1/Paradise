@@ -72,7 +72,7 @@ var/global/list/role_playtime_requirements = list(
 
 		jtext = "-"
 		if(C.mob.mind && C.mob.mind.assigned_role)
-			theirjob = job_master.GetJob(C.mob.mind.assigned_role)
+			theirjob = SSjobs.GetJob(C.mob.mind.assigned_role)
 			if(theirjob)
 				jtext = theirjob.title
 		msg += "<TD>[jtext]</TD>"
@@ -100,6 +100,7 @@ var/global/list/role_playtime_requirements = list(
 // Procs
 
 /proc/role_available_in_playtime(client/C, role)
+	// "role" is a special role defined in role_playtime_requirements above. e.g: ROLE_ERT. This is *not* a job title.
 	if(!C)
 		return 0
 	if(!role)
@@ -120,6 +121,7 @@ var/global/list/role_playtime_requirements = list(
 	if(!isnum(my_exp))
 		return req_mins
 	return max(0, req_mins - my_exp)
+
 
 /datum/job/proc/available_in_playtime(client/C)
 	if(!C)
@@ -178,7 +180,7 @@ var/global/list/role_playtime_requirements = list(
 	if(config.use_exp_restrictions)
 		var/list/jobs_locked = list()
 		var/list/jobs_unlocked = list()
-		for(var/datum/job/job in job_master.occupations)
+		for(var/datum/job/job in SSjobs.occupations)
 			if(job.exp_requirements && job.exp_type)
 				if(!job.available_in_playtime(mob.client))
 					jobs_unlocked += job.title
@@ -255,13 +257,22 @@ var/global/list/role_playtime_requirements = list(
 			play_records[rtype] = text2num(read_records[rtype])
 		else
 			play_records[rtype] = 0
-	if(mob.stat == CONSCIOUS && mob.mind.assigned_role)
+	var/myrole
+	if(mob.mind)
+		if(mob.mind.playtime_role)
+			myrole = mob.mind.playtime_role
+		else if(mob.mind.assigned_role)
+			myrole = mob.mind.assigned_role
+	var/added_living = 0
+	var/added_ghost = 0
+	if(mob.stat == CONSCIOUS && myrole)
 		play_records[EXP_TYPE_LIVING] += minutes
+		added_living += minutes
 		if(announce_changes)
 			to_chat(mob,"<span class='notice'>You got: [minutes] Living EXP!")
 		for(var/category in exp_jobsmap)
 			if(exp_jobsmap[category]["titles"])
-				if(mob.mind.assigned_role in exp_jobsmap[category]["titles"])
+				if(myrole in exp_jobsmap[category]["titles"])
 					play_records[category] += minutes
 					if(announce_changes)
 						to_chat(mob,"<span class='notice'>You got: [minutes] [category] EXP!")
@@ -271,6 +282,7 @@ var/global/list/role_playtime_requirements = list(
 				to_chat(mob,"<span class='notice'>You got: [minutes] Special EXP!")
 	else if(isobserver(mob))
 		play_records[EXP_TYPE_GHOST] += minutes
+		added_ghost += minutes
 		if(announce_changes)
 			to_chat(mob,"<span class='notice'>You got: [minutes] Ghost EXP!")
 	else
@@ -278,18 +290,15 @@ var/global/list/role_playtime_requirements = list(
 	var/new_exp = list2params(play_records)
 	prefs.exp = new_exp
 	new_exp = sanitizeSQL(new_exp)
-	var/DBQuery/update_query = dbcon.NewQuery("UPDATE [format_table_name("player")] SET exp = '[new_exp]' WHERE ckey='[ckey]'")
+	var/DBQuery/update_query = dbcon.NewQuery("UPDATE [format_table_name("player")] SET exp = '[new_exp]',lastseen = Now() WHERE ckey='[ckey]'")
 	if(!update_query.Execute())
 		var/err = update_query.ErrorMsg()
-		log_game("SQL ERROR during exp_update_client write. Error : \[[err]\]\n")
-		message_admins("SQL ERROR during exp_update_client write. Error : \[[err]\]\n")
+		log_game("SQL ERROR during exp_update_client write 1. Error : \[[err]\]\n")
+		message_admins("SQL ERROR during exp_update_client write 1. Error : \[[err]\]\n")
 		return
-
-/hook/roundstart/proc/exptimer()
-	if(!config.sql_enabled || !config.use_exp_tracking)
-		return 1
-	spawn(0)
-		while(TRUE)
-			sleep(5 MINUTES)
-			update_exp(5,0)
-	return 1
+	var/DBQuery/update_query_history = dbcon.NewQuery("INSERT INTO [format_table_name("playtime_history")] (ckey, date, time_living, time_ghost) VALUES ('[ckey]',CURDATE(),[added_living],[added_ghost]) ON DUPLICATE KEY UPDATE time_living=time_living+VALUES(time_living),time_ghost=time_ghost+VALUES(time_ghost)")
+	if(!update_query_history.Execute())
+		var/err = update_query_history.ErrorMsg()
+		log_game("SQL ERROR during exp_update_client write 2. Error : \[[err]\]\n")
+		message_admins("SQL ERROR during exp_update_client write 2. Error : \[[err]\]\n")
+		return

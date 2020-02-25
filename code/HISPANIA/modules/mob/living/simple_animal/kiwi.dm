@@ -4,7 +4,9 @@
 	desc = "It's a real kiwi... maybe?"
 	icon = 'icons/hispania/mob/animals.dmi'
 	icon_state = "kiwi"
+	icon_living = "kiwi"
 	icon_dead = "kiwi_dead"
+	icon_resting = "kiwi_sleep"
 	speak = list("Cherp.","Cherp?","Chirrup.","Cheep!")
 	speak_emote = list("cheeps")
 	emote_hear = list("cheeps")
@@ -33,7 +35,7 @@
 	pass_flags = PASSTABLE | PASSGRILLE | PASSMOB
 	can_hide = 1
 	can_collar = 1
-	gold_core_spawnable = CHEM_MOB_SPAWN_FRIENDLY
+	gold_core_spawnable = FRIENDLY_SPAWN
 
 /mob/living/simple_animal/kiwi/handle_automated_movement()
 	..()
@@ -43,9 +45,9 @@
 			if(step)
 				if(locate(/obj/structure/spacevine) in step)
 					Move(step, get_dir(src, step))
-					sleep 10
+					sleep (10)
 
-/mob/living/simple_animal/kiwi/process_ai()
+/mob/living/simple_animal/kiwi/Life()
 	if(prob(10))
 		src.visible_message("<span class='notice'>[src] thinks about flying through the sky...</span>")
 		icon_state = "kiwi_fly"
@@ -107,3 +109,8 @@
 			to_chat(src, emotelist)
 
 	..(act, m_type, message)
+
+
+
+/mob/living/simple_animal/kiwi/New()
+	name = "kiwi ([rand(100,999)])"

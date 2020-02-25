@@ -20,13 +20,36 @@
 	var/list/linkedmist = list() //Used to keep track of created mist
 	var/deep_water = FALSE		//set to 1 to drown even standing people
 
+/obj/machinery/poolcontroller/invisible
+	invisibility = INVISIBILITY_MAXIMUM
+	name = "Water Controller"
+	desc = "An invisible water controller. Players shouldn't see this."
 
-/obj/machinery/poolcontroller/New() //This proc automatically happens on world start
+/obj/machinery/poolcontroller/invisible/sea
+	name = "Sea Controller"
+	desc = "A controller for the underwater portion of the sea. Players shouldn't see this."
+	deep_water = TRUE
+
+/obj/machinery/poolcontroller/Initialize(mapload)
+	var/contents_loop = linked_area
 	if(!linked_area)
-		for(var/turf/simulated/floor/beach/water/W in range(srange,src)) //Search for /turf/simulated/floor/beach/water in the range of var/srange
-			linkedturfs += W //Add found pool turfs to the central list.
-			W.linkedcontroller = src // And add the linked controller to itself.
-	..() //Changed to call parent as per MarkvA's recommendation
+		contents_loop = range(srange, src)
+
+	for(var/turf/T in contents_loop)
+		if(istype(T, /turf/simulated/floor/beach/water))
+			var/turf/simulated/floor/beach/water/W = T
+			W.linkedcontroller = src
+			linkedturfs += T
+		else if(istype(T, /turf/unsimulated/beach/water))
+			var/turf/unsimulated/beach/water/W = T
+			W.linkedcontroller = src
+			linkedturfs += T
+
+	. = ..()
+
+/obj/machinery/poolcontroller/invisible/Initialize(mapload)
+	linked_area = get_area(src)
+	. = ..()
 
 /obj/machinery/poolcontroller/emag_act(user as mob) //Emag_act, this is called when it is hit with a cryptographic sequencer.
 	if(!emagged) //If it is not already emagged, emag it.
@@ -34,18 +57,15 @@
 
 		emagged = 1 //Set the emag var to true.
 
-/obj/machinery/poolcontroller/attackby(obj/item/I, mob/user, params) //Proc is called when a user hits the pool controller with something.
-	if(ismultitool(I)) //If the mob hits the pool controller with a multitool, reset the emagged status
-		if(emagged) //Check the emag status
-			to_chat(user, "<span class='warning'>You re-enable [src]'s temperature safeguards.</span>")//Inform the user that they have just fixed the safeguards.
-
-			emagged = FALSE //Set the emagged var to false.
-		else
-			to_chat(user, "<span class='warning'>Nothing happens.</span>")//If not emagged, don't do anything, and don't tell the user that it can be emagged.
-
-
-	else //If it's not a multitool, defer to /obj/machinery/attackby
-		return ..()
+/obj/machinery/poolcontroller/multitool_act(mob/user, obj/item/I)
+	. = TRUE
+	if(!I.use_tool(src, user, 0, volume = I.tool_volume))
+		return
+	if(emagged) //Check the emag status
+		to_chat(user, "<span class='warning'>You re-enable [src]'s temperature safeguards.</span>")//Inform the user that they have just fixed the safeguards.
+		emagged = FALSE //Set the emagged var to false.
+	else
+		to_chat(user, "<span class='warning'>Nothing happens.</span>")//If not emagged, don't do anything, and don't tell the user that it can be emagged.
 
 /obj/machinery/poolcontroller/attack_hand(mob/user as mob)
 	ui_interact(user)
@@ -93,12 +113,12 @@
 	if(!drownee)
 		return
 
-	if(drownee && (drownee.lying || deep_water)) //Mob lying down or water is deep (determined by controller)
+	if(drownee && ((drownee.lying && !drownee.player_logged) || deep_water)) //Mob lying down and not SSD or water is deep (determined by controller)
 		if(drownee.internal)
 			return //Has internals, no drowning
 		if((NO_BREATHE in drownee.dna.species.species_traits) || (BREATHLESS in drownee.mutations))
 			return //doesn't breathe, no drowning
-		if(isskrell(drownee) || isneara(drownee))
+		if(HAS_TRAIT(drownee,TRAIT_WATERBREATH))
 			return //fish things don't drown
 
 		if(drownee.stat == DEAD)	//Dead spacemen don't drown more
@@ -189,20 +209,6 @@
 			mistoff()
 
 	return 1
-
-/obj/machinery/poolcontroller/seacontroller
-	invisibility = 101
-	unacidable = 1
-	name = "Sea Controller"
-	desc = "A controller for the underwater portion of the sea. Players shouldn't see this."
-	deep_water = TRUE		//deep sea is deep water
-
-/obj/machinery/poolcontroller/seacontroller/Initialize()
-	linked_area = get_area(src)
-	for(var/turf/unsimulated/beach/water/W in linked_area)
-		linkedturfs += W //Add found pool turfs to the central list.
-		W.linkedcontroller = src // And add the linked controller to itself.
-	..()
 
 #undef FRIGID
 #undef COOL

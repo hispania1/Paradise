@@ -13,6 +13,7 @@
 	new /obj/item/storage/backpack/science(src)
 	new /obj/item/storage/backpack/satchel_tox(src)
 	new /obj/item/clothing/under/rank/scientist(src)
+	new /obj/item/clothing/under/rank/scientist/skirt(src)
 	//new /obj/item/clothing/suit/labcoat/science(src)
 	new /obj/item/clothing/suit/storage/labcoat/science(src)
 	new /obj/item/clothing/shoes/white(src)
@@ -59,23 +60,16 @@
 
 /obj/structure/closet/secure_closet/RD/New()
 	..()
-	new /obj/item/clothing/suit/bio_suit/scientist(src)
-	new /obj/item/clothing/head/bio_hood/scientist(src)
-	new /obj/item/clothing/under/rank/research_director(src)
-	new /obj/item/clothing/suit/storage/labcoat(src)
 	new /obj/item/cartridge/rd(src)
-	new /obj/item/clothing/shoes/white(src)
-	new /obj/item/clothing/gloves/color/latex(src)
 	new /obj/item/radio/headset/heads/rd(src)
 	new /obj/item/tank/air(src)
-	new /obj/item/clothing/mask/gas(src)
-	new /obj/item/clothing/suit/armor/reactive/teleport(src)
 	new /obj/item/flash(src)
 	new /obj/item/laser_pointer(src)
 	new /obj/item/door_remote/research_director(src)
 	new /obj/item/reagent_containers/food/drinks/mug/rd(src)
+	new /obj/item/clothing/suit/armor/reactive/teleport/rd(src)
 	new /obj/item/organ/internal/cyberimp/eyes/hud/diagnostic(src)
-
+	new /obj/item/clothing/accessory/medal/science(src)
 
 /obj/structure/closet/secure_closet/research_reagents
 	name = "research chemical storage closet"

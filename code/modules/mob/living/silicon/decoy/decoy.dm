@@ -19,6 +19,9 @@
 	else
 		return ..()
 
+/mob/living/silicon/decoy/welder_act()
+	return
+
 /mob/living/silicon/decoy/syndicate
 	faction = list("syndicate")
 	name = "R.O.D.G.E.R"
@@ -30,6 +33,8 @@
 	icon_state = "ai-magma"
 
 /mob/living/silicon/decoy/syndicate/depot
+	universal_speak = TRUE
+	universal_understand = TRUE
 	var/raised_alert = FALSE
 
 /mob/living/silicon/decoy/syndicate/depot/proc/raise_alert()

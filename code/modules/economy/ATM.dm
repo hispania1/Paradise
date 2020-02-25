@@ -71,7 +71,7 @@ log transactions
 				playsound(loc, pick('sound/items/polaroid1.ogg', 'sound/items/polaroid2.ogg'), 50, 1)
 				for(var/obj/item/stack/spacecash/S in T)
 					S.use(S.amount)
-				authenticated_account.charge(-cash_amount, null, "Credit deposit", terminal_id = machine_id, dest_name = "Terminal")
+				authenticated_account.charge(-cash_amount, null, "Credit deposit", machine_id, "Terminal")
 
 /obj/machinery/atm/proc/reconnect_database()
 	for(var/obj/machinery/computer/account_database/DB in GLOB.machines)
@@ -105,7 +105,7 @@ log transactions
 			SSnanoui.update_uis(src)
 			C.use(C.amount)
 	else
-		..()
+		return ..()
 
 /obj/machinery/atm/attack_hand(mob/user)
 	if(..())
@@ -240,9 +240,7 @@ log transactions
 						if(amount > 10000) // prevent crashes
 							to_chat(usr, "<span class='notice'>The ATM's screen flashes, 'Maximum single withdrawl limit reached, defaulting to 10,000.'</span>")
 							amount = 10000
-						authenticated_account.money -= amount
 						withdraw_arbitrary_sum(amount)
-
 						authenticated_account.charge(amount, null, "Credit withdrawal", machine_id, authenticated_account.owner_name)
 					else
 						to_chat(usr, "[bicon(src)]<span class='warning'>You don't have enough funds to do that!</span>")

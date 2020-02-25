@@ -6,7 +6,7 @@
 // -------------: AI: no special ai
 // -------------: SPECIAL: spawns an ungodly number of spiderlings when killed
 // -------------: TO FIGHT IT: don't! Just leave it alone! It is harmless by itself... but god help you if you aggro it.
-// -------------: SPRITES FROM: FoS, http://nanotrasen.se/phpBB3/memberlist.php?mode=viewprofile&u=386
+// -------------: SPRITES FROM: FoS, https://www.paradisestation.org/forum/profile/335-fos
 
 /mob/living/simple_animal/hostile/poison/terror_spider/mother
 	name = "Mother of Terror spider"
@@ -37,6 +37,8 @@
 /mob/living/simple_animal/hostile/poison/terror_spider/mother/death(gibbed)
 	if(can_die())
 		if(spider_awaymission && !is_away_level(z))
+			canspawn = FALSE
+		if(degenerate)
 			canspawn = FALSE
 		if(canspawn)
 			canspawn = FALSE

@@ -13,7 +13,7 @@
 	braintype = "Robot"
 	lawupdate = 0
 	density = 0
-	req_access = list(access_engine, access_robotics)
+	req_one_access = list(access_engine, access_robotics)
 	ventcrawler = 2
 	magpulse = 1
 	mob_size = MOB_SIZE_SMALL
@@ -43,6 +43,7 @@
 	remove_language("Galactic Common")
 	add_language("Drone Talk", 1)
 	add_language("Drone", 1)
+	universal_understand = 0
 
 	// Disable the microphone wire on Drones
 	if(radio)
@@ -52,8 +53,7 @@
 		camera.network.Add("Engineering")
 
 	//They are unable to be upgraded, so let's give them a bit of a better battery.
-	cell.maxcharge = 10000
-	cell.charge = 10000
+	cell = new /obj/item/stock_parts/cell/high(src)
 
 	// NO BRAIN.
 	mmi = null
@@ -182,7 +182,7 @@
 	to_chat(user, "<span class='warning'>You swipe the sequencer across [src]'s interface and watch its eyes flicker.</span>")
 
 	if(jobban_isbanned(src, ROLE_SYNDICATE))
-		ticker.mode.replace_jobbanned_player(src, ROLE_SYNDICATE)
+		SSticker.mode.replace_jobbanned_player(src, ROLE_SYNDICATE)
 
 	to_chat(src, "<span class='warning'>You feel a sudden burst of malware loaded into your execute-as-root buffer. Your tiny brain methodically parses, loads and executes the script. You sense you have five minutes before the drone server detects this and automatically shuts you down.</span>")
 
@@ -248,9 +248,9 @@
 	death()
 
 /mob/living/silicon/robot/drone/proc/full_law_reset()
-	clear_supplied_laws()
-	clear_inherent_laws()
-	clear_ion_laws()
+	clear_supplied_laws(TRUE)
+	clear_inherent_laws(TRUE)
+	clear_ion_laws(TRUE)
 	laws = new /datum/ai_laws/drone
 
 //Reboot procs.
@@ -287,12 +287,12 @@
 	lawupdate = 0
 	to_chat(src, "<b>Systems rebooted</b>. Loading base pattern maintenance protocol... <b>loaded</b>.")
 	full_law_reset()
-	to_chat(src, "<br><b>You are a maintenance drone, a tiny-brained robotic repair machine</b>.")
-	to_chat(src, "You have no individual will, no personality, and no drives or urges other than your laws.")
-	to_chat(src, "Use <b>:d</b> to talk to other drones, and <b>say</b> to speak silently in a language only your fellows understand.")
-	to_chat(src, "Remember, you are <b>lawed against interference with the crew</b>. Also remember, <b>you DO NOT take orders from the AI.</b>")
-	to_chat(src, "<b>Don't invade their worksites, don't steal their resources, don't tell them about the changeling in the toilets.</b>")
-	to_chat(src, "<b>Make sure crew members do not notice you.</b>.")
+	to_chat(src, "<br><b>Eres un drone de mantenimiento, una pequeña máquina de reparación con un sencillo cerebro electrónico</b>.")
+	to_chat(src, "No tienes voluntad, personalidad ni motivaciones personales excepto mantener la estación en perfecto estado de funcionamiento.")
+	to_chat(src, "Usa <b>:d</b> para hablar con otros drones remotamente, o <b>say</b> para hablar localmente en un lenguaje que solo otros drones entienden.")
+	to_chat(src, "Recuerda <b>estás programado para no interferir con la estación</b>. ADemás, <b>you No tomas órdenes de la IA.</b>")
+	to_chat(src, "<b>No invadas sus espacios de trabajos, no robes sus materiales, no le digas sobre el changeling que hay en los baños.</b>")
+	to_chat(src, "<b>Asegúrate de que la tripulación ni siquiera note tu existencia.</b>.")
 
 /*
 	sprite["Default"] = "repairbot"
@@ -348,6 +348,6 @@
 		return
 	density = 0 //this is reset every canmove update otherwise
 
-/mob/living/simple_animal/drone/flash_eyes(intensity = 1, override_blindness_check = 0, affect_silicon = 0)
+/mob/living/simple_animal/drone/flash_eyes(intensity = 1, override_blindness_check = 0, affect_silicon = 0, visual = 0)
 	if(affect_silicon)
 		return ..()

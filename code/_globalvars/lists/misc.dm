@@ -34,8 +34,6 @@ GLOBAL_LIST_INIT(restricted_camera_networks, list(
 	"Hotel"
 	)) //Those networks can only be accessed by preexisting terminals. AIs and new terminals can't use them.
 
-GLOBAL_LIST_INIT(mineral_turfs, list())
-
 GLOBAL_LIST_INIT(ruin_landmarks, list())
 
 GLOBAL_LIST_INIT(round_end_sounds, list(
@@ -50,11 +48,12 @@ GLOBAL_LIST_INIT(cooking_recipe_types, list(
 	RECIPE_MICROWAVE = /datum/recipe/microwave,
 	RECIPE_OVEN = /datum/recipe/oven,
 	RECIPE_GRILL = /datum/recipe/grill,
-	RECIPE_CANDY = /datum/recipe/candy
+	RECIPE_CANDY = /datum/recipe/candy,
+	RECIPE_MIXER = /datum/recipe/mixer
 	))
-GLOBAL_LIST_INIT(cooking_recipes, list(RECIPE_MICROWAVE = list(), RECIPE_OVEN = list(), RECIPE_GRILL = list(), RECIPE_CANDY = list()))
-GLOBAL_LIST_INIT(cooking_ingredients, list(RECIPE_MICROWAVE = list(), RECIPE_OVEN = list(), RECIPE_GRILL = list(), RECIPE_CANDY = list()))
-GLOBAL_LIST_INIT(cooking_reagents, list(RECIPE_MICROWAVE = list(), RECIPE_OVEN = list(), RECIPE_GRILL = list(), RECIPE_CANDY = list()))
+GLOBAL_LIST_INIT(cooking_recipes, list(RECIPE_MICROWAVE = list(), RECIPE_OVEN = list(), RECIPE_GRILL = list(), RECIPE_CANDY = list(), RECIPE_MIXER = list()))
+GLOBAL_LIST_INIT(cooking_ingredients, list(RECIPE_MICROWAVE = list(), RECIPE_OVEN = list(), RECIPE_GRILL = list(), RECIPE_CANDY = list(), RECIPE_MIXER = list()))
+GLOBAL_LIST_INIT(cooking_reagents, list(RECIPE_MICROWAVE = list(), RECIPE_OVEN = list(), RECIPE_GRILL = list(), RECIPE_CANDY = list(), RECIPE_MIXER = list()))
 
 GLOBAL_LIST(station_level_space_turfs)
 

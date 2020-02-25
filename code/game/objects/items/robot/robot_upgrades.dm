@@ -31,31 +31,9 @@
 	if(..())
 		return
 
-	R.notify_ai(2)
+	R.reset_module()
 
-	R.uneq_all()
-	R.sight_mode = null
-	R.hands.icon_state = "nomod"
-	R.icon_state = "robot"
-	R.module.remove_subsystems_and_actions(R)
-	QDEL_NULL(R.module)
-
-	R.camera.network.Remove(list("Engineering", "Medical", "Mining Outpost"))
-	R.rename_character(R.real_name, R.get_default_name("Default"))
-	R.languages = list()
-	R.speech_synthesizer_langs = list()
-
-	R.update_icons()
-	R.update_headlamp()
-
-	R.speed = 0 // Remove upgrades.
-	R.ionpulse = 0
-	R.magpulse = 0
-	R.add_language("Robot Talk", 1)
-
-	R.status_flags |= CANPUSH
-
-	return 1
+	return TRUE
 
 /obj/item/borg/upgrade/rename
 	name = "cyborg reclassification board"
@@ -72,7 +50,7 @@
 	if(!R.allow_rename)
 		to_chat(R, "<span class='warning'>Internal diagnostic error: incompatible upgrade module detected.</span>");
 		return 0
-	R.notify_ai(3, R.name, heldname)
+	R.notify_ai(RENAME, R.name, heldname)
 	R.name = heldname
 	R.custom_name = heldname
 	R.real_name = heldname
@@ -97,7 +75,7 @@
 	R.stat = CONSCIOUS
 	GLOB.dead_mob_list -= R //please never forget this ever kthx
 	GLOB.living_mob_list += R
-	R.notify_ai(1)
+	R.notify_ai(NEW_BORG)
 
 	return 1
 
@@ -256,7 +234,7 @@
 
 /obj/item/borg/upgrade/selfrepair/Destroy()
 	cyborg = null
-	processing_objects -= src
+	STOP_PROCESSING(SSobj, src)
 	on = 0
 	return ..()
 
@@ -264,10 +242,10 @@
 	on = !on
 	if(on)
 		to_chat(cyborg, "<span class='notice'>You activate the self-repair module.</span>")
-		processing_objects |= src
+		START_PROCESSING(SSobj, src)
 	else
 		to_chat(cyborg, "<span class='notice'>You deactivate the self-repair module.</span>")
-		processing_objects -= src
+		STOP_PROCESSING(SSobj, src)
 	update_icon()
 
 /obj/item/borg/upgrade/selfrepair/update_icon()
@@ -280,7 +258,7 @@
 		icon_state = "cyborg_upgrade5"
 
 /obj/item/borg/upgrade/selfrepair/proc/deactivate()
-	processing_objects -= src
+	STOP_PROCESSING(SSobj, src)
 	on = 0
 	update_icon()
 
