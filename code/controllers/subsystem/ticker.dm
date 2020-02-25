@@ -86,6 +86,7 @@ SUBSYSTEM_DEF(ticker)
 					if(!player.ready)
 						to_chat(player, "<B> Apresurate! La ronda esta por comenzar </B>")
 						player << sound('sound/hispania/misc/countdown.ogg')
+						winset(player, "mainwindow", "flash=5")
 		if(GAME_STATE_PREGAME)
 			if(!going)
 				return
