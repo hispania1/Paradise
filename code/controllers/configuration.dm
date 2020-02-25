@@ -76,6 +76,9 @@
 	var/assistantlimit = 0 //enables assistant limiting
 	var/assistantratio = 2 //how many assistants to security members
 
+	var/secCadetLimit = 1 //habilita el limite de cadetes
+	var/secCadetratio = 3 // Cuantos sec officer para habilitar un cadete?
+
 	// The AFK subsystem will not be activated if any of the below config values are equal or less than 0
 	var/warn_afk_minimum = 0 // How long till you get a warning while being AFK
 	var/auto_cryo_afk = 0 // How long till you get put into cryo when you're AFK
