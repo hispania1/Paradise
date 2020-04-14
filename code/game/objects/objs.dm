@@ -46,7 +46,7 @@
 		else
 			T.add_blueprints_preround(src)
 
-/obj/Topic(href, href_list, var/nowindow = 0, var/datum/topic_state/state = default_state)
+/obj/Topic(href, href_list, var/nowindow = 0, var/datum/topic_state/state = GLOB.default_state)
 	// Calling Topic without a corresponding window open causes runtime errors
 	if(!nowindow && ..())
 		return 1
@@ -295,7 +295,7 @@ a {
 		return FALSE
 	if(I.tool_behaviour != TOOL_WRENCH)
 		return FALSE
-	if(!I.use_tool(src, user, 0, volume = I.tool_volume))
+	if(!I.tool_use_check(user, 0))
 		return FALSE
 	if(!(flags & NODECONSTRUCT))
 		to_chat(user, "<span class='notice'>Now [anchored ? "un" : ""]securing [name].</span>")
@@ -305,7 +305,7 @@ a {
 		return TRUE
 	return FALSE
 
-/obj/water_act(volume, temperature, source, method = TOUCH)
+/obj/water_act(volume, temperature, source, method = REAGENT_TOUCH)
 	. = ..()
 	extinguish()
 	acid_level = 0

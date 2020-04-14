@@ -33,7 +33,8 @@ SUBSYSTEM_DEF(ticker)
 	var/triai = 0//Global holder for Triumvirate
 	var/initialtpass = 0 //holder for inital autotransfer vote timer
 	var/obj/screen/cinematic = null			//used for station explosion cinematic
-	var/round_end_announced = 0 // Spam Prevention. Announce round end only once.\
+	var/round_end_announced = 0 // Spam Prevention. Announce round end only once.
+	var/ticker_going = TRUE // This used to be in the unused globals, but it turns out its actually used in a load of places. Its now a ticker var because its related to round stuff, -aa
 
 /datum/controller/subsystem/ticker/Initialize()
 	login_music = pick(\
@@ -41,20 +42,10 @@ SUBSYSTEM_DEF(ticker)
 	'sound/music/space.ogg',\
 	'sound/music/title1.ogg',\
 	'sound/music/title2.ogg',\
-	'sound/music/title3.ogg',\
-	'sound/music/title4.ogg',\
-	'sound/music/title5.ogg',\
-	'sound/music/title6.ogg',\
-	'sound/music/title7.ogg',\
-	'sound/music/title8.ogg',\
-	'sound/music/title9.ogg',\
-	'sound/music/title10.ogg',\
-	'sound/music/title11.ogg',\
-	'sound/music/title12.ogg',)
-
+	'sound/music/title3.ogg',)
 	// Map name
-	if(using_map && using_map.name)
-		GLOB.map_name = "[using_map.name]"
+	if(GLOB.using_map && GLOB.using_map.name)
+		GLOB.map_name = "[GLOB.using_map.name]"
 	else
 		GLOB.map_name = "Unknown"
 
@@ -72,28 +63,17 @@ SUBSYSTEM_DEF(ticker)
 		if(GAME_STATE_STARTUP)
 			// This is ran as soon as the MC starts firing, and should only run ONCE, unless startup fails
 			round_start_time = world.time + (config.pregame_timestart * 10)
-			to_chat(world, "<B><FONT color='blue'>Bienvenido al lobby!</FONT></B>")
-			to_chat(world, "Por favor, prepara tu personaje y selecciona Ready. El juego comenzara en [config.pregame_timestart] segundos")
+			to_chat(world, "<B><FONT color='blue'>Welcome to the pre-game lobby!</FONT></B>")
+			to_chat(world, "Please, setup your character and select ready. Game will start in [config.pregame_timestart] seconds")
 			current_state = GAME_STATE_PREGAME
 			fire() // TG says this is a good idea
-			spawn((config.pregame_timestart * 10) - 1000)
-				for(var/mob/new_player/player in GLOB.player_list)
-					if(!player.ready)
-						to_chat(player, "No olvides seleccionar ready! De esa forma saldran mas modos de juego")
-						player << sound('sound/hispania/misc/get_ready.ogg')
-			spawn((config.pregame_timestart * 10) - 500)
-				for(var/mob/new_player/player in GLOB.player_list)
-					if(!player.ready)
-						to_chat(player, "<B> Apresurate! La ronda esta por comenzar </B>")
-						player << sound('sound/hispania/misc/countdown.ogg')
-						winset(player, "mainwindow", "flash=5")
 		if(GAME_STATE_PREGAME)
-			if(!going)
+			if(!SSticker.ticker_going) // This has to be referenced like this, and I dont know why. If you dont put SSticker. it will break
 				return
 
 			// This is so we dont have sleeps in controllers, because that is a bad, bad thing
 			if(!delay_end)
-				pregame_timeleft = max(0,round_start_time - world.time) // Normal lobby countdown when roundstart was not delayed			
+				pregame_timeleft = max(0,round_start_time - world.time) // Normal lobby countdown when roundstart was not delayed
 			else
 				pregame_timeleft = max(0,pregame_timeleft - 20) // If roundstart was delayed, we should resume the countdown where it left off
 
@@ -149,20 +129,20 @@ SUBSYSTEM_DEF(ticker)
 /datum/controller/subsystem/ticker/proc/setup()
 	cultdat = setupcult()
 	//Create and announce mode
-	if(master_mode=="secret")
+	if(GLOB.master_mode=="secret")
 		src.hide_mode = 1
 	var/list/datum/game_mode/runnable_modes
-	if((master_mode=="random") || (master_mode=="secret"))
+	if((GLOB.master_mode=="random") || (GLOB.master_mode=="secret"))
 		runnable_modes = config.get_runnable_modes()
 		if(runnable_modes.len==0)
 			current_state = GAME_STATE_PREGAME
 			Master.SetRunLevel(RUNLEVEL_LOBBY)
 			to_chat(world, "<B>Unable to choose playable game mode.</B> Reverting to pre-game lobby.")
 			return 0
-		if(secret_force_mode != "secret")
-			var/datum/game_mode/M = config.pick_mode(secret_force_mode)
+		if(GLOB.secret_force_mode != "secret")
+			var/datum/game_mode/M = config.pick_mode(GLOB.secret_force_mode)
 			if(M.can_start())
-				src.mode = config.pick_mode(secret_force_mode)
+				src.mode = config.pick_mode(GLOB.secret_force_mode)
 		SSjobs.ResetOccupations()
 		if(!src.mode)
 			src.mode = pickweight(runnable_modes)
@@ -170,7 +150,7 @@ SUBSYSTEM_DEF(ticker)
 			var/mtype = src.mode.type
 			src.mode = new mtype
 	else
-		src.mode = config.pick_mode(master_mode)
+		src.mode = config.pick_mode(GLOB.master_mode)
 	if(!src.mode.can_start())
 		to_chat(world, "<B>Unable to start [mode.name].</B> Not enough players, [mode.required_players] players needed. Reverting to pre-game lobby.")
 		mode = null
@@ -187,7 +167,7 @@ SUBSYSTEM_DEF(ticker)
 	if(!can_continue)
 		qdel(mode)
 		current_state = GAME_STATE_PREGAME
-		to_chat(world, "<B>Error setting up [master_mode].</B> Reverting to pre-game lobby.")
+		to_chat(world, "<B>Error setting up [GLOB.master_mode].</B> Reverting to pre-game lobby.")
 		SSjobs.ResetOccupations()
 		Master.SetRunLevel(RUNLEVEL_LOBBY)
 		return 0
@@ -206,7 +186,7 @@ SUBSYSTEM_DEF(ticker)
 	populate_spawn_points()
 	collect_minds()
 	equip_characters()
-	data_core.manifest()
+	GLOB.data_core.manifest()
 	current_state = GAME_STATE_PLAYING
 	Master.SetRunLevel(RUNLEVEL_GAME)
 
@@ -469,11 +449,11 @@ SUBSYSTEM_DEF(ticker)
 
 
 /datum/controller/subsystem/ticker/proc/declare_completion()
-	nologevent = 1 //end of round murder and shenanigans are legal; there's no need to jam up attack logs past this point.
+	GLOB.nologevent = 1 //end of round murder and shenanigans are legal; there's no need to jam up attack logs past this point.
 	//Round statistics report
 	var/datum/station_state/end_state = new /datum/station_state()
 	end_state.count()
-	var/station_integrity = min(round( 100.0 *  start_state.score(end_state), 0.1), 100.0)
+	var/station_integrity = min(round( 100.0 *  GLOB.start_state.score(end_state), 0.1), 100.0)
 
 	to_chat(world, "<BR>[TAB]Shift Duration: <B>[round(ROUND_TIME / 36000)]:[add_zero("[ROUND_TIME / 600 % 60]", 2)]:[ROUND_TIME / 100 % 6][ROUND_TIME / 100 % 10]</B>")
 	to_chat(world, "<BR>[TAB]Station Integrity: <B>[mode.station_was_nuked ? "<font color='red'>Destroyed</font>" : "[station_integrity]%"]</B>")
@@ -539,7 +519,7 @@ SUBSYSTEM_DEF(ticker)
 	SSevents.RoundEnd()
 
 	// Add AntagHUD to everyone, see who was really evil the whole time!
-	for(var/datum/atom_hud/antag/H in huds)
+	for(var/datum/atom_hud/antag/H in GLOB.huds)
 		for(var/m in GLOB.player_list)
 			var/mob/M = m
 			H.add_hud_to(M)
